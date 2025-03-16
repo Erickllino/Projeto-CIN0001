@@ -15,21 +15,28 @@ my_font = pygame.font.SysFont('Comic Sans MS', 20)
 
 class Player:
     def __init__(self, x, y, radius=10, color=(255, 0, 0)):
+        # Posição do jogador
         self.x = x
         self.y = y
+        # Posição do jogador na tela
         self.draw_x = 0
         self.draw_y = 0
+        # Características do jogador
         self.xp = 0
         self.health = 100
+        self.speed = 4
+        
+        # Desenho do jogador
         self.radius = radius
         self.color = color
-        self.speed = 4
+        
 
     def hitbox(self):
         return pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2)
 
     def move(self, keys, map_size, mask):
         dx, dy = 0, 0
+        # Movimentação do jogador
         if keys[pygame.K_LEFT]:
             dx = -self.speed
         if keys[pygame.K_RIGHT]:
@@ -44,11 +51,15 @@ class Player:
         new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
         new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
 
-        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (new_x - self.radius, new_y - self.radius)):
+        # Check collision with map
+        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (new_x - self.radius, self.y - self.radius)):
             self.x = new_x
+        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (self.x - self.radius, new_y - self.radius)):
             self.y = new_y
 
+        
     def draw(self, game_window, center, map_size, window_size, offset_x, offset_y):
+        # Mantém o jogador no centro da tela
         if self.x > window_size[0] // 2 and self.x < map_size[0] - window_size[0] // 2:
             draw_x = center[0]
         else:
@@ -61,30 +72,41 @@ class Player:
 
         self.draw_x = draw_x
         self.draw_y = draw_y
-        # draw self
+        
+        # Desenha o jogador, quando for colocar uma imagem, substituir o pygame.draw.circle por game_window.blit
         pygame.draw.circle(game_window, self.color, (int(draw_x), int(draw_y)), self.radius)
 
 
 
 class Vampire_Cinvivals:
     def __init__(self, w=600, h=600):
+        # Tamanho da tela
         self.w = w
         self.h = h
+        # Inicializa a tela
         self.display = pygame.display.set_mode((w, h))
+        # Nome do jogo
         pygame.display.set_caption("Vampire_Cinvivals")
+        # Inicializa o relógio, para contgem do tempo e FPS
         self.clock = pygame.time.Clock()
 
+        # Carrega o mapa
         self.Map = pygame.image.load("sprites/map.jpg").convert()  # Resolução da Imagem 2550x3300
 
+        # Cria a máscara de colisão, se quiser usar uma mascara diferente, basta trocar o arquivo
         self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (1, 1, 1))  # Cria a máscara de colisão
         
+        # Inicializa o spawn de inimigos
         self.last_spawn = 0
+
+        # Inicializa as armas, pode ser adicionado mais armas
         self.active_weapons = [Basic_attack(), Book()]
 
     def map_collision(self):
         NotImplemented
 
     def play_step(self, player, enemies, elapsed_time):
+        # Eventos do jogo
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True
@@ -97,6 +119,7 @@ class Vampire_Cinvivals:
         self.display.fill((0, 0, 0))
         map_size = self.Map.get_size()
         window_size = self.display.get_size()
+        # Calcula o offset para manter o jogador no centro da tela
         offset_x = max(0, min(map_size[0] - window_size[0], player.x - window_size[0] / 2))
         offset_y = max(0, min(map_size[1] - window_size[1], player.y - window_size[1] / 2))
         self.display.blit(self.Map, (-offset_x, -offset_y))
@@ -110,6 +133,7 @@ class Vampire_Cinvivals:
             for enemy in enemies:
                 enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
 
+        # Upgrade Basic_attack
         if player.xp >= 10 and player.xp != 0:
             player.xp = 0
             self.active_weapons[0].radius *= 1.10
@@ -119,6 +143,8 @@ class Vampire_Cinvivals:
             spawn_rate = int(1.06173*(elapsed_time**0.6231684)) # Colocar uma fórmula para o aumento de inimigos
         else:
             spawn_rate = 30
+
+        
         if elapsed_time != self.last_spawn:
             for i in range(spawn_rate):
                 bool_spawn = True
