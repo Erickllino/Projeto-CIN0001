@@ -5,7 +5,7 @@ class Basic_attack:
     def __init__(self):
         self.color = (0, 0, 100)
         self.radius = 60
-        self.damage = 1
+        self.damage = 10
         self.time = 0
         self.cooldown = 2
 
