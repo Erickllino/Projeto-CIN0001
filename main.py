@@ -14,7 +14,7 @@ my_font = pygame.font.SysFont('Comic Sans MS', 20)
 
 
 class Player:
-    def __init__(self, x, y, radius=10, color=(255, 0, 0)):
+    def __init__(self, x, y):
         # Posição do jogador
         self.x = x
         self.y = y
@@ -30,10 +30,47 @@ class Player:
         self.invulnerable_time = 1
         self.last_hit_time = 0
 
-        # Desenho do jogador
-        self.radius = radius
-        self.color = color
-        
+        # Grupo de sprites
+        self.todas_as_sprites = pygame.sprite.Group()
+        self.rungame = self.Run(x, y)  # Passar x e y para a classe Run
+        self.todas_as_sprites.add(self.rungame)
+
+    class Run(pygame.sprite.Sprite):
+        def __init__(self, x, y):
+            pygame.sprite.Sprite.__init__(self)
+
+            self.sprites = [
+                pygame.image.load(f'rungame/sprite_{i}.png') for i in range(8)
+            ]
+            
+            self.atual = 0
+            self.image = self.sprites[self.atual]
+            self.image = pygame.transform.scale(self.image, (669 // 10, 569 // 10))
+
+            self.rect = self.image.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+
+            self.animation_speed = 0.15
+            self.last_update = pygame.time.get_ticks()
+            self.facing_right = True  # Direção inicial
+
+        def update(self, facing_right):
+            now = pygame.time.get_ticks()
+            if now - self.last_update > 100:
+                self.last_update = now
+                self.atual = (self.atual + 1) % len(self.sprites)
+                
+                # Se o jogador estiver virado para a direita, usa a sprite normal
+                if facing_right:
+                    self.image = self.sprites[self.atual]
+                else:
+                    # Se estiver virado para a esquerda, inverte a imagem
+                    self.image = pygame.transform.flip(self.sprites[self.atual], True, False)
+                
+                self.image = pygame.transform.scale(self.image, (669 // 10, 569 // 10))
+
+                
     def update_invulnerability(self, current_time):
         if self.invulnerable:
             # Check if invulnerability period has ended
@@ -49,26 +86,38 @@ class Player:
 
     def move(self, keys, map_size, mask):
         dx, dy = 0, 0
-        # Movimentação do jogador
+        moving = False  
+
         if keys[pygame.K_LEFT]:
             dx = -self.speed
+            moving = True
+            self.rungame.facing_right = False  # Vira para a esquerda
         if keys[pygame.K_RIGHT]:
             dx = self.speed
+            moving = True
+            self.rungame.facing_right = True  # Vira para a direita
         if keys[pygame.K_UP]:
             dy = -self.speed
+            moving = True
         if keys[pygame.K_DOWN]:
             dy = self.speed
+            moving = True
         if keys[pygame.K_TAB]:
             pygame.quit()
 
-        new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
-        new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
+        new_x = max(0, min(map_size[0] - self.rungame.rect.width, self.rungame.rect.x + dx))
+        new_y = max(0, min(map_size[1] - self.rungame.rect.height, self.rungame.rect.y + dy))
 
-        # Check collision with map
-        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (new_x - self.radius, self.y - self.radius)):
-            self.x = new_x
-        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (self.x - self.radius, new_y - self.radius)):
-            self.y = new_y
+        if not mask.overlap_area(pygame.mask.from_surface(self.rungame.image), (new_x, self.rungame.rect.y)):
+            self.rungame.rect.x = new_x
+            self.x = new_x  
+
+        if not mask.overlap_area(pygame.mask.from_surface(self.rungame.image), (self.rungame.rect.x, new_y)):
+            self.rungame.rect.y = new_y
+            self.y = new_y  
+
+        if moving:
+            self.rungame.update(self.rungame.facing_right)  # Atualiza a animação
 
         
     def draw(self, game_window, center, map_size, window_size, offset_x, offset_y):
@@ -87,7 +136,8 @@ class Player:
         self.draw_y = draw_y
         
         # Desenha o jogador, quando for colocar uma imagem, substituir o pygame.draw.circle por game_window.blit
-        pygame.draw.circle(game_window, self.color, (int(draw_x), int(draw_y)), self.radius)
+        game_window.blit(self.rungame.image, (int(draw_x - self.rungame.image.get_width() // 2), int(draw_y - self.rungame.image.get_height() // 2)))
+
 
 
 
