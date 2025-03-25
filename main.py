@@ -22,6 +22,7 @@ class Player:
         self.draw_x = 0
         self.draw_y = 0
         # Características do jogador
+        self.level = 1
         self.xp = 0
         self.health = 100
         self.speed = 4
@@ -33,6 +34,8 @@ class Player:
         # Desenho do jogador
         self.radius = radius
         self.color = color
+
+        
         
     def update_invulnerability(self, current_time):
         if self.invulnerable:
@@ -113,10 +116,8 @@ class Vampire_Cinvivals:
         self.last_spawn = 0
 
         # Inicializa as armas, pode ser adicionado mais armas
-        self.active_weapons = [Basic_attack(), Book()]
+        self.active_weapons = {'Cracha':Basic_attack(),'Book': Book()}
 
-    def map_collision(self):
-        NotImplemented
 
     def main_menu(self,game):
         menu_ativo = True
@@ -189,13 +190,50 @@ class Vampire_Cinvivals:
     def level_up(self, player):
         leveling_up = True
         while leveling_up:
-            leveling_up = False
-        NotImplemented
+
+            # Cria 3 Retangulos com 3 opçoes de upgrade
+            up_size = 100
+            pygame.draw.rect(self.display, (255, 0, 0), ((self.w-up_size)//4-up_size//2,(self.h-up_size)//2, up_size, up_size))
+            pygame.draw.rect(self.display, (0, 255, 0), ((self.w-up_size)//2, (self.h-up_size)//2, up_size, up_size))
+            pygame.draw.rect(self.display, (0, 0, 255), ((3*self.w-up_size)//4,  (self.h-up_size)//2, up_size, up_size))
+            # Mostra os 3 retangulos na tela sem apagar o que já foi desenhado
+
+            upgrade1 = my_font.render("Upgrade 1", True, (255, 255, 255))
+            self.display.blit(upgrade1, ((self.w-up_size)//4-up_size//2, (self.h-up_size)//2))
+            pygame.display.flip()
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                # Quando o jogador pressionar ENTER, tenta denovo
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        
+                        leveling_up = False
+                        
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_2:
+                        
+                        leveling_up = False
+                        
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_3:
+                        
+                        leveling_up = False
+                        
+                    
+
+            
+        
 
     def play_step(self, player, enemies, elapsed_time):
         # Eventos do jogo
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
                 return True
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return True
@@ -221,7 +259,7 @@ class Vampire_Cinvivals:
 
         # Weapons
         for weapon in self.active_weapons:
-            weapon_instance = weapon
+            weapon_instance = self.active_weapons[weapon]
             weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
             for enemy in enemies:
                 if not enemy.invulnerable:
@@ -229,9 +267,10 @@ class Vampire_Cinvivals:
                     enemy.make_invulnerable(elapsed_time)
 
         # Upgrade Basic_attack
-        if player.xp >= 10 and player.xp != 0:
-            player.xp = 0
-            self.active_weapons[0].radius *= 1.10
+        if player.xp >= 10*(player.level**2) and player.xp != 0:
+           self.level_up(player)
+           player.xp = 0
+           player.level += 1
       
         # Spawn Enemies
         if len(enemies) <= 3000:
@@ -259,7 +298,7 @@ class Vampire_Cinvivals:
                 
                 enemies.append(Enemy_one(spawn_x, spawn_y))
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
-                print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {self.active_weapons[0].radius}')
+                print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {self.active_weapons['Cracha'].radius}')
                 self.last_spawn = elapsed_time
                 spawn_rate += 1
 
