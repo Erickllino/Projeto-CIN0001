@@ -118,6 +118,12 @@ class Vampire_Cinvivals:
         # Inicializa as armas, pode ser adicionado mais armas
         self.active_weapons = {'Cracha':Basic_attack(),'Book': Book()}
 
+        # Possiveis upgrades ao upar de nivel
+        self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.health *= 1.1'], 
+                         'Speed':['Aumenta a velocidade em 10%', 'player.speed *= 1.1'],
+                        'Cracha radius':['Aumenta o raio do ataque básico em 10%', 'self.active_weapons[\'Cracha\'].radius *= 1.1'],
+                        'Cracha damage':['Aumenta o dano do ataque básico em 10', 'self.active_weapons[\'Cracha\'].damage += 10'],
+                        'Cracha cooldown':['Diminui o cooldown do ataque básico', 'self.active_weapons[\'Cracha\'].cooldown *= 0.5']}
 
     def main_menu(self,game):
         menu_ativo = True
@@ -189,17 +195,23 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
         leveling_up = True
+        
         while leveling_up:
 
             # Cria 3 Retangulos com 3 opçoes de upgrade
-            up_size = 100
+            up_size = self.w//4
             pygame.draw.rect(self.display, (255, 0, 0), ((self.w-up_size)//4-up_size//2,(self.h-up_size)//2, up_size, up_size))
             pygame.draw.rect(self.display, (0, 255, 0), ((self.w-up_size)//2, (self.h-up_size)//2, up_size, up_size))
             pygame.draw.rect(self.display, (0, 0, 255), ((3*self.w-up_size)//4,  (self.h-up_size)//2, up_size, up_size))
             # Mostra os 3 retangulos na tela sem apagar o que já foi desenhado
 
-            upgrade1 = my_font.render("Upgrade 1", True, (255, 255, 255))
+            upgrade1 = my_font.render("Aperte 1", True, (255, 255, 255))
             self.display.blit(upgrade1, ((self.w-up_size)//4-up_size//2, (self.h-up_size)//2))
+            upgrade2 = my_font.render("Aperte 2", True, (255, 255, 255))
+            self.display.blit(upgrade2, ((self.w-up_size)//2, (self.h-up_size)//2))
+            upgrade3 = my_font.render("Aperte 3", True, (255, 255, 255))
+            self.display.blit(upgrade3, ((3*self.w-up_size)//4, (self.h-up_size)//2))
+
             pygame.display.flip()
 
 
@@ -210,17 +222,17 @@ class Vampire_Cinvivals:
                 # Quando o jogador pressionar ENTER, tenta denovo
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_1:
-                        
+                        exec(self.upgrades['Health'][1])
                         leveling_up = False
                         
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_2:
-                        
+                        exec(self.upgrades['Cracha cooldown'][1])
                         leveling_up = False
                         
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_3:
-                        
+                        exec(self.upgrades['Cracha radius'][1])
                         leveling_up = False
                         
                     
@@ -260,14 +272,21 @@ class Vampire_Cinvivals:
         # Weapons
         for weapon in self.active_weapons:
             weapon_instance = self.active_weapons[weapon]
+            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
+
+
+            if not weapon_instance.on_cooldown(elapsed_time):
+                for enemy in enemies:
+                    if not enemy.invulnerable:
+                        enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
+                        enemy.make_invulnerable(elapsed_time)
+
+            # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
+            print(f'elapsed time : {elapsed_time} activation:{weapon_instance.activation_time}, draw dur:{weapon_instance.draw_duration}')
             weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
-            for enemy in enemies:
-                if not enemy.invulnerable:
-                    enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
-                    enemy.make_invulnerable(elapsed_time)
 
         # Upgrade Basic_attack
-        if player.xp >= 10*(player.level**2) and player.xp != 0:
+        if player.xp >= 10*(1.1**(player.level-1)) and player.xp != 0:
            self.level_up(player)
            player.xp = 0
            player.level += 1
@@ -331,21 +350,21 @@ class Vampire_Cinvivals:
 
         # Mostrar o tempo total de jogo
         time_text = my_font.render(f'Time: {elapsed_time}s', True, (255, 255, 0))
-        self.display.blit(time_text, (250, 10))
+        self.display.blit(time_text, (self.w//2, 10))
 
         # Mostrar a vida do jogador
         health_text = my_font.render(f'Health: {player.health}', True, (255, 0, 0))
-        self.display.blit(health_text, (10, 570))
+        self.display.blit(health_text, (10, self.h - 30))
 
         # Mostrar a pontuação do jogador
         xp_text = my_font.render(f'XP: {player.xp}', True, (0, 255, 0))
-        self.display.blit(xp_text, (250, 570))
+        self.display.blit(xp_text, (self.w//2, self.h - 30))
 
         pygame.display.flip()
         self.clock.tick(120)
         return False
 
-game = Vampire_Cinvivals()
+game = Vampire_Cinvivals(1200, 800)
 player = Player(x=1250, y=3150)
 enemies = []
 game_over = False
