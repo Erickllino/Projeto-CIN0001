@@ -37,8 +37,19 @@ class Player:
         # Desenho do jogador
         self.radius = radius
         self.color = color
-
         
+        # Possiveis upgrades ao upar de nivel
+        self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.max_health *= 1.1 ; player.health *= 1.1'],
+                         'Restore Health':['Restaura a vida do jogador', 'player.health = player.max_health'], 
+                         'Speed':['Aumenta a velocidade em 10%', 'player.speed *= 1.1'],
+                         'Life Steal':[self.get_life_steal_description(), 'player.life_steal += 0.1'],
+                         'Cracha radius':['Aumenta o raio do ataque básico em 10%', 'self.active_weapons[\'Cracha\'].radius *= 1.1'],
+                         'Cracha damage':['Aumenta o dano do ataque básico em 10', 'self.active_weapons[\'Cracha\'].damage += 10'],
+                         'Cracha cooldown':['Diminui o cooldown do ataque básico', 'self.active_weapons[\'Cracha\'].cooldown *= 0.5']}
+
+    def get_life_steal_description(self):
+        return f'Aumenta em 10% o roubo de vida: {self.life_steal * 100 + 10}% dano causado cura o personagem'
+
         
     def update_invulnerability(self, current_time):
         if self.invulnerable:
@@ -121,14 +132,8 @@ class Vampire_Cinvivals:
         # Inicializa as armas, pode ser adicionado mais armas
         self.active_weapons = {'Cracha':Basic_attack(),'Book': Book()}
 
-        # Possiveis upgrades ao upar de nivel
-        self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.max_health *= 1.1 ; player.health *= 1.1'],
-                         'Restore Health':['Restaura a vida do jogador', 'player.health = player.max_health'], 
-                         'Speed':['Aumenta a velocidade em 10%', 'player.speed *= 1.1'],
-                         'Life Steal':['Aumenta o roubo de vida em 10%', 'player.life_steal *= 1.1'],
-                         'Cracha radius':['Aumenta o raio do ataque básico em 10%', 'self.active_weapons[\'Cracha\'].radius *= 1.1'],
-                         'Cracha damage':['Aumenta o dano do ataque básico em 10', 'self.active_weapons[\'Cracha\'].damage += 10'],
-                         'Cracha cooldown':['Diminui o cooldown do ataque básico', 'self.active_weapons[\'Cracha\'].cooldown *= 0.5']}
+        
+
 
     def main_menu(self,game):
         menu_ativo = True
@@ -200,28 +205,26 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
         leveling_up = True
-        selected_keys = random.sample(list(self.upgrades.keys()), 3)
-        selected_upgrades = { key: self.upgrades[key] for key in selected_keys }
-        print(selected_upgrades)
-        print(selected_upgrades[selected_keys[0]][1])
+        player.upgrades = player.upgrades
+        selected_keys = random.sample(list(player.upgrades.keys()), 3)
+        selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
+
         while leveling_up:
-
-            """            
-            # Cria 3 Retangulos com 3 opçoes de upgrade
             
-            pygame.draw.rect(self.display, (255, 0, 0), ((self.w-up_size)//4-up_size//2,(self.h-up_size)//2, up_size, up_size))
-            pygame.draw.rect(self.display, (0, 255, 0), ((self.w-up_size)//2, (self.h-up_size)//2, up_size, up_size))
-            pygame.draw.rect(self.display, (0, 0, 255), ((3*self.w-up_size)//4,  (self.h-up_size)//2, up_size, up_size))
-            # Mostra os 3 retangulos na tela sem apagar o que já foi desenhado
-
-            text1 = my_font.render(selected_upgrades[selected_keys[0]][0], True, (255, 255, 255))
-            text2 = my_font.render(selected_upgrades[selected_keys[1]][0], True, (255, 255, 255))
-            text3 = my_font.render(selected_upgrades[selected_keys[2]][0], True, (255, 255, 255))
-            """
-
+            # tamanho do retângulo
             up_size = self.w//4
 
-            
+            # Renderiza cada linha e posiciona no retângulo
+            def blit_text(display, text_lines, rect, font, color=(255,255,255)):
+                line_height = font.get_linesize()
+                total_text_height = len(text_lines) * line_height
+                y_offset = rect.centery - total_text_height // 2
+                for line in text_lines:
+                    rendered_line = font.render(line, True, color)
+                    line_rect = rendered_line.get_rect(centerx=rect.centerx, y=y_offset)
+                    display.blit(rendered_line, line_rect)
+                    y_offset += line_height
+
             def wrap_text(text, font, max_width):
                 words = text.split(' ')
                 lines = []
@@ -236,24 +239,15 @@ class Vampire_Cinvivals:
                 lines.append(current_line)
                 return lines
 
-            # Configura a fonte inicial
+
+
+            # Configura a fonte do Texto do upgrade
             font = pygame.font.SysFont('Arial', 30)
             max_text_width = up_size - 10  # margem
 
             lines1 = wrap_text(selected_upgrades[selected_keys[0]][0], font, max_text_width)
             lines2 = wrap_text(selected_upgrades[selected_keys[1]][0], font, max_text_width)
             lines3 = wrap_text(selected_upgrades[selected_keys[2]][0], font, max_text_width)
-
-            # Renderiza cada linha e posiciona no retângulo
-            def blit_text(display, text_lines, rect, font, color=(255,255,255)):
-                line_height = font.get_linesize()
-                total_text_height = len(text_lines) * line_height
-                y_offset = rect.centery - total_text_height // 2
-                for line in text_lines:
-                    rendered_line = font.render(line, True, color)
-                    line_rect = rendered_line.get_rect(centerx=rect.centerx, y=y_offset)
-                    display.blit(rendered_line, line_rect)
-                    y_offset += line_height
 
             # Criação dos retângulos (exemplo)
             rect1 = pygame.Rect((self.w - up_size) // 4 - up_size // 2, (self.h - up_size) // 2, up_size, up_size)
@@ -344,7 +338,9 @@ class Vampire_Cinvivals:
                 for enemy in enemies:
                     if not enemy.invulnerable:
                         enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
-                        player.health += player.life_steal*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+                        if player.health < player.max_health:
+                            player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+                        
                         enemy.make_invulnerable(elapsed_time)
 
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
@@ -352,7 +348,7 @@ class Vampire_Cinvivals:
             weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
 
         # Upgrade Basic_attack
-        if player.xp >= 10*(1.1**(player.level-1)) and player.xp != 0:
+        if player.xp >= 1*(1.1**(player.level-1)) and player.xp != 0:
            self.level_up(player)
            player.xp = 0
            player.level += 1
@@ -429,9 +425,10 @@ class Vampire_Cinvivals:
         pygame.display.flip()
         self.clock.tick(120)
         return False
-
-game = Vampire_Cinvivals(1200, 800)
+    
 player = Player(x=1250, y=3150)
+game = Vampire_Cinvivals(1200, 800)
+
 enemies = []
 game_over = False
 try_again = True 
