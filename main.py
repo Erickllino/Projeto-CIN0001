@@ -273,6 +273,7 @@ class Vampire_Cinvivals:
 
             pygame.display.flip()
 
+#das
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
