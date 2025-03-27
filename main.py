@@ -315,7 +315,7 @@ class Vampire_Cinvivals:
                         print(f'Player at: {player.x, player.y}, Enemy at: {spawn_x, spawn_y}')
                         bool_spawn = False
             
-                enemies.append(Enemy_one(spawn_x, spawn_y))
+                #enemies.append(Enemy_one(spawn_x, spawn_y))
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
                 cracha_radius = self.active_weapons['Cracha'].radius
                 print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {cracha_radius}')
