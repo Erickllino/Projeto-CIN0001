@@ -28,7 +28,7 @@ class Basic_attack:
 
     def on_cooldown(self, elapsed_time):
         # Se ainda estiver no cooldown, retorna True
-        print('O cooldown é:', self.cooldown)
+        
         if elapsed_time - self.activation_time <= self.cooldown:
             return True
         else:
