@@ -205,7 +205,7 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
         leveling_up = True
-        player.upgrades = player.upgrades
+  
         selected_keys = random.sample(list(player.upgrades.keys()), 3)
         selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
 
