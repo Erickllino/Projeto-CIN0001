@@ -431,6 +431,7 @@ player = Player(x=1250, y=3150)
 game = Vampire_Cinvivals(1200, 800)
 
 enemies = []
+books = []
 game_over = False
 try_again = True 
 start_time = pygame.time.get_ticks()  # Tempo inicial do jogo
