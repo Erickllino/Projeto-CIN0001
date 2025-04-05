@@ -142,7 +142,7 @@ class Player:
 
 
 class Vampire_Cinvivals:
-    def __init__(self, w=600, h=600):
+    def __init__(self, w=1000, h=1000):
         # Tamanho da tela
         self.w = w
         self.h = h
