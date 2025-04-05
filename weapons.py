@@ -45,13 +45,15 @@ class Basic_attack:
 class Book:
     def __init__(self):
         self.color = (255, 0, 100)
-        self.radius = 60
+        self.radius = 100
         self.damage = 1
 
         self.x = 0
         self.y = 0
 
-        self.cooldown = 2
+        self.drop = 2
+
+        self.cooldown = 4
         self.draw_duration = self.cooldown//2
         self.activation_time = -self.cooldown
 
@@ -59,7 +61,7 @@ class Book:
         
     
     def check_hit(self, target_x, target_y, player_x, player_y, elapsed_time):
-        distance = math.sqrt((player_x - target_x) ** 2 + (player_y - target_y) ** 2)
+        distance = math.sqrt((self.x - target_x) ** 2 + (self.y - target_y) ** 2)
 
         if distance <= self.radius:
             return -self.damage
@@ -73,8 +75,10 @@ class Book:
             self.x = play.draw_x
             self.y = play.draw_y
 
+        if elapsed_time - self.activation_time < self.draw_duration:
+            pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
         
-        pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
+
 
 
 

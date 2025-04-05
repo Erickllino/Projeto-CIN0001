@@ -131,7 +131,7 @@ class Vampire_Cinvivals:
 
         # Inicializa as armas, pode ser adicionado mais armas
         self.active_weapons = {'Cracha':Basic_attack(),'Book': Book()}
-
+        self.all_weapons = ['Cracha', 'Book']
         
 
     def main_menu(self,game):
@@ -317,6 +317,10 @@ class Vampire_Cinvivals:
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 
+        for weapon_instance in self.all_weapons:
+            if not weapon_instance in self.active_weapons.keys():
+                pass
+        
 
         # Update invulnerability
         player.update_invulnerability(elapsed_time)
@@ -326,9 +330,11 @@ class Vampire_Cinvivals:
         # Weapons
         for weapon in self.active_weapons:
             weapon_instance = self.active_weapons[weapon]
-            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
+            
+            # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
+            weapon_instance.draw(self.display, player, elapsed_time)
 
-            print(weapon_instance.can_activate(elapsed_time))
+            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
             if weapon_instance.can_activate(elapsed_time):
                 weapon_instance.activate(elapsed_time)
                 for enemy in enemies:
@@ -339,12 +345,13 @@ class Vampire_Cinvivals:
                         
                         enemy.make_invulnerable(elapsed_time)
 
-            # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
             
-            weapon_instance.draw(self.display, player, elapsed_time)
+            
+            
+
 
         # Upgrade Basic_attack
-        if player.xp >= 1*(1.1**(player.level-1)) and player.xp != 0:
+        if player.xp >= 10*(1.1**(player.level-1)) and player.xp != 0:
            self.level_up(player)
            player.xp = 0
            player.level += 1
