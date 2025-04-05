@@ -27,7 +27,7 @@ class Basic_attack:
         else:
             return 0
 
-    def draw(self, game_window, play, elapsed_time):
+    def draw(self, game_window, off_x, off_y, play, elapsed_time):
         # Se estiver dentro do período em que a arma deve ser desenhada, desenha
         self.x = play.draw_x
         self.y = play.draw_y
@@ -71,12 +71,22 @@ class Book:
         else:
             return 0
       
-    def draw(self, game_window, play, elapsed_time):
+    def draw(self, game_window, off_x, off_y, play, elapsed_time):
         # Se estiver dentro do período em que a arma deve ser desenhada, desenha
-        if self.can_activate(elapsed_time):
+
+        X = self.x
+        Y = self.y
+
+        if self.can_drop(elapsed_time):
             print("Cooldown")
-            self.x = play.draw_x
-            self.y = play.draw_y
+            X = play.x - off_x
+            Y = play.y - off_y
+
+            self.x = X
+            self.y = Y
+        else:
+            self.x = X
+            self.y = Y
 
         if elapsed_time - self.activation_time < self.draw_duration:
             pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
@@ -87,3 +97,5 @@ class Book:
     def activate(self, elapsed_time):
         self.activation_time = elapsed_time
         
+    def can_drop(self, elapsed_time):
+        return elapsed_time - self.activation_time >= self.drop

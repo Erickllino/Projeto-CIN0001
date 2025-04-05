@@ -339,7 +339,7 @@ class Vampire_Cinvivals:
             weapon_instance = self.active_weapons[weapon]
             
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
-            weapon_instance.draw(self.display, player, elapsed_time)
+            weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
 
             # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
             if weapon_instance.can_activate(elapsed_time):
