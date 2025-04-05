@@ -130,7 +130,7 @@ class Vampire_Cinvivals:
         self.last_spawn = 0
 
         # Inicializa as armas, pode ser adicionado mais armas
-        self.active_weapons = {'Cracha':Basic_attack(),'Book': Book()}
+        self.active_weapons = {'Cracha':Basic_attack()}
         self.all_weapons = ['Cracha', 'Book']
         
 
@@ -316,16 +316,23 @@ class Vampire_Cinvivals:
         self.display.blit(self.Map, (-offset_x, -offset_y))
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
-
-        for weapon_instance in self.all_weapons:
-            if not weapon_instance in self.active_weapons.keys():
-                pass
-        
-
+       
+        print(f'Player at: {player.x, player.y}')
         # Update invulnerability
         player.update_invulnerability(elapsed_time)
         for enemy in enemies:
             enemy.update_invulnerability(elapsed_time)
+        # Desenha as armas a serem colocadas no chão
+
+
+        for weapon_instance in self.all_weapons:
+            if weapon_instance not in self.active_weapons.keys():
+                if weapon_instance == 'Book':
+                    screen_x = 1250 - offset_x
+                    screen_y = 2400 - offset_y
+                    pygame.draw.circle(self.display, (255, 0, 100), (int(screen_x), int(screen_y)), 10)
+                    if player.hitbox().colliderect(pygame.Rect(1250 - 10, 2400 - 10, 20, 20)):
+                        self.active_weapons['Book'] = Book()
 
         # Weapons
         for weapon in self.active_weapons:
@@ -347,9 +354,6 @@ class Vampire_Cinvivals:
 
             
             
-            
-
-
         # Upgrade Basic_attack
         if player.xp >= 10*(1.1**(player.level-1)) and player.xp != 0:
            self.level_up(player)

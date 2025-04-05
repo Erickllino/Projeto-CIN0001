@@ -5,8 +5,7 @@ import math
 
 class Basic_attack:
     def __init__(self):
-        self.color = (0, 0, 100)
-        self.radius = 60
+        # Atributos essenciais da arma
         self.damage = 10
 
         self.x = 0
@@ -17,6 +16,9 @@ class Basic_attack:
         self.draw_duration = self.cooldown//2   # Tempo em que a arma ficará desenhada após a ativação
         
         self.activation_time = -self.cooldown  # Inicializa com um valor que não bloqueie logo no começo
+        
+        self.color = (0, 0, 100)
+        self.radius = 60
 
     def check_hit(self, target_x, target_y, player_x, player_y, elapsed_time):
         distance = math.sqrt((player_x - target_x) ** 2 + (player_y - target_y) ** 2)
@@ -44,19 +46,20 @@ class Basic_attack:
 
 class Book:
     def __init__(self):
-        self.color = (255, 0, 100)
-        self.radius = 100
+        # Atributos essenciais da arma
         self.damage = 1
 
         self.x = 0
         self.y = 0
 
-        self.drop = 2
-
-        self.cooldown = 4
+        self.cooldown = 4 # Tempo total de cooldown para checagem de hit
         self.draw_duration = self.cooldown//2
         self.activation_time = -self.cooldown
 
+        # Atributos específicos da arma
+        self.color = (255, 0, 100)
+        self.radius = 100
+        self.drop = 2 # O o intervalo de tempo entre os drops de livro
         self.size = 10
         
     
@@ -78,14 +81,9 @@ class Book:
         if elapsed_time - self.activation_time < self.draw_duration:
             pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
         
-
-
-
-
     def can_activate(self, elapsed_time):
         return elapsed_time - self.activation_time >= self.cooldown
 
     def activate(self, elapsed_time):
         self.activation_time = elapsed_time
         
-
