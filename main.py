@@ -134,7 +134,6 @@ class Vampire_Cinvivals:
 
         
 
-
     def main_menu(self,game):
         menu_ativo = True
         while menu_ativo:
@@ -293,12 +292,7 @@ class Vampire_Cinvivals:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_3:
                         exec(selected_upgrades[selected_keys[2]][1])
-                        leveling_up = False
-                        
-                    
-
-            
-        
+                        leveling_up = False        
 
     def play_step(self, player, enemies, elapsed_time):
         # Eventos do jogo
@@ -334,8 +328,9 @@ class Vampire_Cinvivals:
             weapon_instance = self.active_weapons[weapon]
             # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
-
-            if not weapon_instance.on_cooldown(elapsed_time):
+            print(weapon_instance.can_activate(elapsed_time))
+            if weapon_instance.can_activate(elapsed_time):
+                weapon_instance.activate(elapsed_time)
                 for enemy in enemies:
                     if not enemy.invulnerable:
                         enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
@@ -346,7 +341,7 @@ class Vampire_Cinvivals:
 
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
             
-            weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
+            weapon_instance.draw(self.display, player, elapsed_time)
 
         # Upgrade Basic_attack
         if player.xp >= 1*(1.1**(player.level-1)) and player.xp != 0:
