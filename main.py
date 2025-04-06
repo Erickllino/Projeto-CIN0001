@@ -5,7 +5,7 @@ import math
 from weapons import Basic_attack
 from weapons import Book
 
-from Enemies import Enemy_one
+from Enemies import ZombieOne, ZombieTwo
 
 pygame.init()
 pygame.font.init()
@@ -46,9 +46,15 @@ class Player:
         }
         self.sprite_width = 64
         self.sprite_height = 64
+    
         for direction in self.sprites:
             self.sprites[direction] = [pygame.transform.scale(sprite, (self.sprite_width, self.sprite_height)) 
                                      for sprite in self.sprites[direction]]
+        #som da catraca 
+        self.som_catraca = pygame.mixer.Sound("sprites/sons_effects/catraca.wav")
+        self.som_catraca_tocado = False  # Agora está dentro da classe e controlado certinho
+
+        
     def update_invulnerability(self, current_time):
         if self.invulnerable:
             # Check if invulnerability period has ended
@@ -104,6 +110,15 @@ class Player:
             self.y = new_y
 
 
+    def update_som_catraca(self):
+        if 2050 <= self.x <= 2210 and 4600 < self.y < 4500:
+
+            if not self.som_catraca_tocado:     
+                self.som_catraca.play()
+                self.som_catraca.play()
+                self.som_catraca_tocado = True
+        else:
+            self.som_catraca_tocado = False 
 
     def update_animation(self, current_time):
         if self.moving:
@@ -281,11 +296,6 @@ class Vampire_Cinvivals:
                     if event.key == pygame.K_3:
                         exec(self.upgrades['Cracha radius'][1])
                         leveling_up = False
-                        
-                    
-
-            
-        
 
     def play_step(self, player, enemies, elapsed_time):
         # Eventos do jogo
@@ -296,20 +306,20 @@ class Vampire_Cinvivals:
                 return True
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return True
-
+        
+            
         keys = pygame.key.get_pressed()
         player.move(keys, self.Map.get_size(), self.mask)
 
         self.display.fill((0, 0, 0))
         map_size = self.Map.get_size()
         window_size = self.display.get_size()
-        # Calcula o offset para manter o jogador no centro da tela
         offset_x = max(0, min(map_size[0] - window_size[0], player.x - window_size[0] / 2))
         offset_y = max(0, min(map_size[1] - window_size[1], player.y - window_size[1] / 2))
         self.display.blit(self.Map, (-offset_x, -offset_y))
 
+        # Desenha o jogador no centro da janela
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
-
 
         # Update invulnerability
         player.update_invulnerability(elapsed_time)
@@ -319,17 +329,11 @@ class Vampire_Cinvivals:
         # Weapons
         for weapon in self.active_weapons:
             weapon_instance = self.active_weapons[weapon]
-            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
-
-
             if not weapon_instance.on_cooldown(elapsed_time):
                 for enemy in enemies:
                     if not enemy.invulnerable:
                         enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
                         enemy.make_invulnerable(elapsed_time)
-
-            # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
-            print(f'elapsed time : {elapsed_time} activation:{weapon_instance.activation_time}, draw dur:{weapon_instance.draw_duration}')
             weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
 
         # Upgrade Basic_attack
@@ -340,10 +344,9 @@ class Vampire_Cinvivals:
       
         # Spawn Enemies
         if len(enemies) <= 3000:
-            spawn_rate = int(1.06173*(elapsed_time**0.6231684)) # Colocar uma fórmula para o aumento de inimigos
+            spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
         else:
             spawn_rate = 30
-
         
         if elapsed_time != self.last_spawn:
             for i in range(spawn_rate):
@@ -362,7 +365,8 @@ class Vampire_Cinvivals:
                         print(f'Player at: {player.x, player.y}, Enemy at: {spawn_x, spawn_y}')
                         bool_spawn = False
             
-                enemies.append(Enemy_one(spawn_x, spawn_y))
+                enemies.append(ZombieTwo(spawn_x, spawn_y))
+                enemies.append(ZombieOne(spawn_x, spawn_y))
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
                 cracha_radius = self.active_weapons['Cracha'].radius
                 print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {cracha_radius}')
@@ -370,50 +374,61 @@ class Vampire_Cinvivals:
                 spawn_rate += 1
 
         # Move Enemies
+        current_time = pygame.time.get_ticks() / 1000
         for enemy_one in enemies:
             enemy_one.move(player, self.mask)
+            enemy_one.update_death(current_time)
             enemy_one.draw(self.display, offset_x, offset_y)
 
-            
         # Check if enemies hit player
         for enemy_one in enemies:
+            # Cálculo da distância
             distance = math.sqrt((player.x - enemy_one.x) ** 2 + (player.y - enemy_one.y) ** 2)
-            if distance < 10 and not player.invulnerable:
-                player.health -= 1
-                player.make_invulnerable(elapsed_time)
+
+            # Início do ataque (só acontece uma vez)
+            if distance < 10 and not player.invulnerable and not enemy_one.is_dying and not enemy_one.atack:
+                enemy_one.atack = True
+                enemy_one.atack_frame_timer = 0
+                enemy_one.atack_frame_index = 0
+
+            # Atualiza a animação do ataque em todo frame, se estiver atacando
+            if enemy_one.atack:
+                enemy_one.update_atack(current_time, player)
 
         if player.health <= 0:
             return True
 
-        # Remove dead Enemies
+        # Handle enemy death and removal
         for enemy_one in enemies[:]:
-            if enemy_one.life <= 0:
+            if enemy_one.life <= 0 and not enemy_one.is_dying:
+                enemy_one.is_dying = True
+                enemy_one.death_frame_timer = 0
+            elif enemy_one.marked_for_removal:
                 enemies.remove(enemy_one)
                 player.xp += 1
 
-        # Mostrar FPS na tela
+        # Mostrar FPS, tempo, vida e XP
         fps = int(self.clock.get_fps())
         fps_text = my_font.render(f"FPS: {fps}", True, (0, 0, 255))
         self.display.blit(fps_text, (10, 10))
 
-        # Mostrar o tempo total de jogo
         time_text = my_font.render(f'Time: {elapsed_time}s', True, (255, 255, 0))
-        self.display.blit(time_text, (self.w//2, 10))
+        self.display.blit(time_text, (self.w // 2, 10))
 
-        # Mostrar a vida do jogador
         health_text = my_font.render(f'Health: {player.health}', True, (255, 0, 0))
         self.display.blit(health_text, (10, self.h - 30))
 
-        # Mostrar a pontuação do jogador
         xp_text = my_font.render(f'XP: {player.xp}', True, (0, 255, 0))
-        self.display.blit(xp_text, (self.w//2, self.h - 30))
+        self.display.blit(xp_text, (self.w // 2, self.h - 30))
 
         pygame.display.flip()
         self.clock.tick(120)
         return False
 
+        #x=2050 a 2210 y= 4600
+
 game = Vampire_Cinvivals(1200, 800)
-player = Player(x=2000, y=4800)
+player = Player(x=2100, y= 4800)
 enemies = []
 game_over = False
 try_again = True 
@@ -424,8 +439,7 @@ while try_again:
     while not game_over:
         # Calcula o tempo total de jogo em segundos
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
-
         game_over = game.play_step(player, enemies, elapsed_time)
-
+        
     try_again, game_over = game.game_over()
 pygame.quit()
