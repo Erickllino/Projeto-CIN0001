@@ -36,8 +36,8 @@ class Player:
 
         # Desenho do jogador
         self.radius = radius
-        self.color = color
-        
+        self.color = color      
+                
         # Possiveis upgrades ao upar de nivel
         self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.max_health *= 1.1 ; player.health *= 1.1'],
                          'Restore Health':['Restaura a vida do jogador', 'player.health = player.max_health'], 
@@ -46,11 +46,24 @@ class Player:
                          'Cracha radius':['Aumenta o raio do ataque básico em 10%', 'self.active_weapons[\'Cracha\'].radius *= 1.1'],
                          'Cracha damage':['Aumenta o dano do ataque básico em 10', 'self.active_weapons[\'Cracha\'].damage += 10'],
                          'Cracha cooldown':['Diminui o cooldown do ataque básico', 'self.active_weapons[\'Cracha\'].cooldown *= 0.5']}
+        self.frame = 0
+        self.animation_speed = 0.1
+        self.last_update = 0
+        self.direction = 'right'
+        self.moving = False
+        self.sprites = {
+            "right": [pygame.image.load(f"sprites/personagem_direita/frame{i}.png") for i in range(8)],
+            "left": [pygame.image.load(f"sprites/personagem_esquerda/frame{i}.png") for i in range(8)]
+        }
+        self.sprite_width = 64
+        self.sprite_height = 64
+        for direction in self.sprites:
+            self.sprites[direction] = [pygame.transform.scale(sprite, (self.sprite_width, self.sprite_height)) 
+                                     for sprite in self.sprites[direction]]
 
     def get_life_steal_description(self):
         return f'Aumenta em 10% o roubo de vida: {self.life_steal * 100 + 10}% dano causado cura o personagem'
 
-        
     def update_invulnerability(self, current_time):
         if self.invulnerable:
             # Check if invulnerability period has ended
@@ -63,32 +76,65 @@ class Player:
     
     def hitbox(self):
         return pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2)
-
+    
     def move(self, keys, map_size, mask):
         dx, dy = 0, 0
-        # Movimentação do jogador
+        self.moving = False
+
         if keys[pygame.K_LEFT]:
             dx = -self.speed
+            self.direction = 'left'
+            self.moving = True
         if keys[pygame.K_RIGHT]:
             dx = self.speed
+            self.direction = 'right'
+            self.moving = True
         if keys[pygame.K_UP]:
-            dy = -self.speed
+            dy = -self.speed    
+            self.moving = True
         if keys[pygame.K_DOWN]:
             dy = self.speed
+            self.moving = True
         if keys[pygame.K_TAB]:
             pygame.quit()
 
-        new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
-        new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
+        # Sprite e máscara
+        sprite = self.sprites[self.direction][int(self.frame)]
+        player_mask = pygame.mask.from_surface(sprite)
 
-        # Check collision with map
-        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (new_x - self.radius, self.y - self.radius)):
+        # — Movimento horizontal (X) —
+        new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
+        offset_x = int(new_x - self.sprite_width // 2)
+        offset_y = int(self.y - self.sprite_height // 2)
+
+        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
             self.x = new_x
-        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (self.x - self.radius, new_y - self.radius)):
+
+        # — Movimento vertical (Y) —
+        new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
+        offset_x = int(self.x - self.sprite_width // 2)  # já atualizado
+        offset_y = int(new_y - self.sprite_height // 2)
+
+        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
             self.y = new_y
 
-        
+
+
+    def update_animation(self, current_time):
+        if self.moving:
+            
+            if current_time -self.last_update >= self.animation_speed:
+                self.frame = (self.frame + 1) %8 #8 frames de animação
+                self.last_update = current_time
+        else:
+            self.frame = 0 #volta pro primeirp frma quando para
+            
+            
     def draw(self, game_window, center, map_size, window_size, offset_x, offset_y):
+    # Atualiza a animação com o tempo atual
+        current_time = pygame.time.get_ticks() / 1000  # Em segundos
+        self.update_animation(current_time)
+
         # Mantém o jogador no centro da tela
         if self.x > window_size[0] // 2 and self.x < map_size[0] - window_size[0] // 2:
             draw_x = center[0]
@@ -103,13 +149,15 @@ class Player:
         self.draw_x = draw_x
         self.draw_y = draw_y
         
-        # Desenha o jogador, quando for colocar uma imagem, substituir o pygame.draw.circle por game_window.blit
-        pygame.draw.circle(game_window, self.color, (int(draw_x), int(draw_y)), self.radius)
+        # Desenha o sprite animado do jogador
+        current_sprite = self.sprites[self.direction][self.frame]
+        sprite_rect = current_sprite.get_rect(center=(int(draw_x), int(draw_y)))
+        game_window.blit(current_sprite, sprite_rect)
 
 
 
 class Vampire_Cinvivals:
-    def __init__(self, w=600, h=600):
+    def __init__(self, w=1000, h=1000):
         # Tamanho da tela
         self.w = w
         self.h = h
@@ -121,7 +169,7 @@ class Vampire_Cinvivals:
         self.clock = pygame.time.Clock()
 
         # Carrega o mapa
-        self.Map = pygame.image.load("sprites/map.jpg").convert()  # Resolução da Imagem 2550x3300
+        self.Map = pygame.image.load("sprites/map.png").convert()  # Resolução da Imagem  3902x5055
 
         # Cria a máscara de colisão, se quiser usar uma mascara diferente, basta trocar o arquivo
         self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão
@@ -383,10 +431,11 @@ class Vampire_Cinvivals:
                     if not (visible_x_min <= spawn_x <= visible_x_max and visible_y_min <= spawn_y <= visible_y_max):
                         print(f'Player at: {player.x, player.y}, Enemy at: {spawn_x, spawn_y}')
                         bool_spawn = False
-                
+            
                 enemies.append(Enemy_one(spawn_x, spawn_y))
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
-                print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {self.active_weapons['Cracha'].radius}')
+                cracha_radius = self.active_weapons['Cracha'].radius
+                print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {cracha_radius}')
                 self.last_spawn = elapsed_time
                 spawn_rate += 1
 
@@ -435,7 +484,7 @@ class Vampire_Cinvivals:
     
 player = Player(x=1250, y=3150)
 game = Vampire_Cinvivals(1200, 800)
-
+player = Player(x=2000, y=4800)
 enemies = []
 game_over = False
 try_again = True 
