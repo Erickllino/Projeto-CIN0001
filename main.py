@@ -98,25 +98,16 @@ class Player:
         if keys[pygame.K_TAB]:
             pygame.quit()
 
-        # Sprite e máscara
-        sprite = self.sprites[self.direction][int(self.frame)]
-        player_mask = pygame.mask.from_surface(sprite)
 
-        # — Movimento horizontal (X) —
         new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
-        offset_x = int(new_x - self.sprite_width // 2)
-        offset_y = int(self.y - self.sprite_height // 2)
-
-        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
-            self.x = new_x
-
-        # — Movimento vertical (Y) —
         new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
-        offset_x = int(self.x - self.sprite_width // 2)  # já atualizado
-        offset_y = int(new_y - self.sprite_height // 2)
 
-        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
+        # Check collision with map
+        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (new_x - self.radius, self.y - self.radius)):
+            self.x = new_x
+        if not mask.overlap_area(pygame.mask.Mask((self.radius * 2, self.radius * 2), fill=True), (self.x - self.radius, new_y - self.radius)):
             self.y = new_y
+
 
 
 
@@ -150,8 +141,9 @@ class Player:
         self.draw_y = draw_y
         
         # Desenha o sprite animado do jogador
+        
         current_sprite = self.sprites[self.direction][self.frame]
-        sprite_rect = current_sprite.get_rect(center=(int(draw_x), int(draw_y)))
+        sprite_rect = current_sprite.get_rect(center=(int(draw_x), int(draw_y)-15))
         game_window.blit(current_sprite, sprite_rect)
 
 
@@ -320,7 +312,7 @@ class Vampire_Cinvivals:
 
             pygame.display.flip()
 
-#das
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -370,16 +362,16 @@ class Vampire_Cinvivals:
         player.update_invulnerability(elapsed_time)
         for enemy in enemies:
             enemy.update_invulnerability(elapsed_time)
+
+
         # Desenha as armas a serem colocadas no chão
-
-
         for weapon_instance in self.all_weapons:
             if weapon_instance not in self.active_weapons.keys():
                 if weapon_instance == 'Book':
-                    screen_x = 1250 - offset_x
-                    screen_y = 2400 - offset_y
+                    screen_x = 1800- offset_x
+                    screen_y = 3330 - offset_y
                     pygame.draw.circle(self.display, (255, 0, 100), (int(screen_x), int(screen_y)), 10)
-                    if player.hitbox().colliderect(pygame.Rect(1250 - 10, 2400 - 10, 20, 20)):
+                    if player.hitbox().colliderect(pygame.Rect(1800 - 10, 3330 - 10, 20, 20)):
                         self.active_weapons['Book'] = Book()
 
         # Weapons
