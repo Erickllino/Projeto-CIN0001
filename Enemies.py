@@ -95,6 +95,7 @@ class Enemy:
         self.invulnerable = True
         self.last_hit_time = current_time
 
+
     def update_death(self, current_time):
         if self.is_dying:
             self.death_frame_timer += self.death_frame_speed
