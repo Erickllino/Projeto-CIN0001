@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-
+import time
 from weapons import Basic_attack
 from weapons import Book, Bottle
 
@@ -25,7 +25,8 @@ class Vampire_Cinvivals:
         self.offset_x = 0  # Novo atributo
         self.offset_y = 0  # Novo atributo
         self.bottles = [] # As Garrafas lançadas
-        # Tamanho da tel
+        self.time = time.time() # Controla o tempo da explosão das bombas
+        # Tamanho da tela
         self.w = w
         self.h = h
 
@@ -55,7 +56,7 @@ class Vampire_Cinvivals:
 
         # Inicializa as armas, pode ser adicionado mais armas
 
-        self.active_weapons = {'Cracha':Basic_attack(), "Garrafa": Bottle()}
+        self.active_weapons = {'Cracha':Basic_attack(), "Garrafa": ""}
 
         self.all_weapons = ['Cracha', 'Book', "Garrafa"]
 
@@ -133,8 +134,6 @@ class Vampire_Cinvivals:
 
             clock.tick(60)
 
-
-
     def game_over(self):
 
         game_over = True
@@ -207,8 +206,6 @@ class Vampire_Cinvivals:
 
             clock.tick(60)
 
-
-
     def level_up(self, player):
 
  
@@ -223,18 +220,11 @@ class Vampire_Cinvivals:
 
         while leveling_up:
 
-            
-
             # tamanho do retângulo
-
             up_size = self.w//4
 
-
-
             # Renderiza cada linha e posiciona no retângulo
-
             def blit_text(display, text_lines, rect, font, color=(255,255,255)):
-
                 line_height = font.get_linesize()
 
                 total_text_height = len(text_lines) * line_height
@@ -386,8 +376,6 @@ class Vampire_Cinvivals:
 
                         leveling_up = False        
 
-
-
     def play_step(self, player, enemies, elapsed_time):
 
         # Eventos do jogo
@@ -463,7 +451,7 @@ class Vampire_Cinvivals:
 
                 if weapon_instance == 'Book':
 
-                    screen_x = 1800- offset_x
+                    screen_x = 1800 - offset_x
 
                     screen_y = 3330 - offset_y
 
@@ -485,28 +473,42 @@ class Vampire_Cinvivals:
 
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
             if weapon == "Garrafa":
-                pass
-            weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
+                remover = []
+                if time.time() - self.time  >= 0.5:
+                    print(len(self.bottles))
+                    self.bottles.append(Bottle(player.x, player.y, time.time()))
+                    self.time = time.time() 
+                for i in range(len(self.bottles)):
+                    bottle = self.bottles[i]                
+                    isAtivo = bottle.estado(time.time(), self.display, offset_x, offset_y)
+                    if isAtivo:
+                      remover.append(i)
+                for x in remover:
+                    del self.bottles[x]       
 
-            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
+            else:
 
-            if weapon_instance.can_activate(elapsed_time):
+                weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
 
-                weapon_instance.activate(elapsed_time)
+                # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
-                for enemy in enemies:
+                if weapon_instance.can_activate(elapsed_time):
 
-                    if not enemy.invulnerable:
+                    weapon_instance.activate(elapsed_time)
 
-                        enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
+                    for enemy in enemies:
 
-                        if player.health < player.max_health:
+                        if not enemy.invulnerable:
 
-                            player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+                            enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
 
-                        
+                            if player.health < player.max_health:
 
-                        enemy.make_invulnerable(elapsed_time)
+                                player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+
+                            
+
+                            enemy.make_invulnerable(elapsed_time)
 
 
         # Upgrade Basic_attack

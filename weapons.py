@@ -101,69 +101,24 @@ class Book:
         return elapsed_time - self.activation_time >= self.drop
 
 class Bottle:
-    def __init__(self):
-        # Atributos essenciais da arma
-        self.damage = 1
+    def __init__(self, x, y, temp):
+        self.x = x
+        self.y = y
+        self.temp = temp
+        self.imagem = pygame.image.load("./sprites/garrafa.png")
+        self.imagem = pygame.transform.scale(self.imagem, (20, 40))
+   
+    def draw(self, screen, offset_x, offset_y):
 
-        self.x = 0
-        self.y = 0
-
-        self.cooldown = 4 # Tempo total de cooldown para checagem de hit
-        self.draw_duration = self.cooldown//2
-        self.activation_time = -self.cooldown
-
-        # Atributos específicos da arma
-        self.color = (255, 0, 0)
-        self.width = 5
-        self.drop = 2 # O o intervalo de tempo entre os drops de livro
-        self.size = 10
-        
+        screen.blit(self.imagem, (self.x-offset_x, self.y-offset_y))
     
-    def check_hit(self, target_x, target_y, player_x, player_y, elapsed_time):
-        distance = math.sqrt((self.x - target_x) ** 2 + (self.y - target_y) ** 2)
+    def estado(self, tempo, screen, offset_x, offset_y):
+        if tempo - self.temp < 4:
+            self.draw(screen, offset_x, offset_y)
+            return False
+        return True
 
-        if distance <= self.radius:
-            return -self.damage
-        else:
-            return 0
-      
-    def draw(self, game_window, off_x, off_y, play, elapsed_time):
-        # Se estiver dentro do período em que a arma deve ser desenhada, desenha
-       
-       
-        X = self.x
-        Y = self.y
 
-        if self.can_drop(elapsed_time):
-            print("Cooldown")
-            X = play.x - off_x - 2
-            Y = play.y - off_y
-
-            self.x = X
-            self.y = Y
-        else:
-            self.x = X
-            self.y = Y
-
-        if elapsed_time - self.activation_time < self.draw_duration:
-            pygame.draw.rect(game_window, self.color, (self.x, self.y, 100,150))
-            print("oi")
-        
-    def can_activate(self, elapsed_time):
-        return elapsed_time - self.activation_time >= self.cooldown
-
-    def activate(self, elapsed_time):
-        self.activation_time = elapsed_time
-        
-    def can_drop(self, elapsed_time):
-        return elapsed_time - self.activation_time >= self.drop
-    # def __init__(self, x, y, angle):
-    #     self.x = x
-    #     self.y = y
-    #     self.angle = angle
-    #     self.speed = 7
-    #     self.color = (0, 0, 0)
-    
     # def check_hit(self):
     #     pass
 
@@ -185,3 +140,4 @@ class Bottle:
 
 #     def draw(self, screen):
 #         pygame.draw.circle(screen, self.color, (self.x, self.y), 10)
+

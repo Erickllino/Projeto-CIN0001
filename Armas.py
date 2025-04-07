@@ -120,6 +120,11 @@ while running:
     
     # Desenha o quadrado
     pygame.draw.rect(screen, BLUE, (square_x, square_y, square_size, square_size))
+    imagem = pygame.image.load("./sprites/garrafa.png")
+    imagem = pygame.transform.scale(imagem, (20, 40))
+   
+    
+    screen.blit(imagem, (250, 250))
     
     pygame.display.update()
 
