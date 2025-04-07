@@ -1,17 +1,24 @@
 import pygame
 import math
 
+
+
 class Basic_attack:
     def __init__(self):
-        self.color = (0, 0, 100)
-        self.radius = 60
+        # Atributos essenciais da arma
         self.damage = 10
+
+        self.x = 0
+        self.y = 0
         
         # Tempo de cooldown e duração do desenho
         self.cooldown = 2            # Tempo total de cooldown
-        self.draw_duration = self.cooldown/2    # Tempo em que a arma ficará desenhada após a ativação
+        self.draw_duration = self.cooldown//2   # Tempo em que a arma ficará desenhada após a ativação
         
         self.activation_time = -self.cooldown  # Inicializa com um valor que não bloqueie logo no começo
+        
+        self.color = (0, 0, 100)
+        self.radius = 60
 
     def check_hit(self, target_x, target_y, player_x, player_y, elapsed_time):
         distance = math.sqrt((player_x - target_x) ** 2 + (player_y - target_y) ** 2)
@@ -20,64 +27,75 @@ class Basic_attack:
         else:
             return 0
 
-    def draw(self, game_window, x, y, elapsed_time):
+    def draw(self, game_window, off_x, off_y, play, elapsed_time):
         # Se estiver dentro do período em que a arma deve ser desenhada, desenha
-        self.draw_duration = self.cooldown/2
-        if elapsed_time - self.activation_time < self.draw_duration:
-            pygame.draw.circle(game_window, self.color, (x, y), self.radius, width=5)
-
-    def on_cooldown(self, elapsed_time):
-        # Se ainda estiver no cooldown, retorna True
+        self.x = play.draw_x
+        self.y = play.draw_y
+        #self.draw_duration = self.cooldown/2
         
-        if elapsed_time - self.activation_time <= self.cooldown:
-            return True
-        else:
-            # Atualiza o tempo de ativação e retorna False (não está em cooldown)
-            self.activation_time = elapsed_time
-            return False
+        if elapsed_time - self.activation_time < self.draw_duration:
+            pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
+
+    def can_activate(self, elapsed_time):
+        return elapsed_time - self.activation_time >= self.cooldown
+
+    def activate(self, elapsed_time):
+        self.activation_time = elapsed_time
 
 
 
 class Book:
     def __init__(self):
-        self.color = (255, 0, 100)
-        self.radius = 60
+        # Atributos essenciais da arma
         self.damage = 1
 
-        self.cooldown = 2
+        self.x = 0
+        self.y = 0
+
+        self.cooldown = 4 # Tempo total de cooldown para checagem de hit
         self.draw_duration = self.cooldown//2
         self.activation_time = -self.cooldown
 
+        # Atributos específicos da arma
+        self.color = (255, 0, 100)
+        self.radius = 100
+        self.drop = 2 # O o intervalo de tempo entre os drops de livro
         self.size = 10
         
-        
-
+    
     def check_hit(self, target_x, target_y, player_x, player_y, elapsed_time):
-        distance = math.sqrt((player_x - target_x) ** 2 + (player_y - target_y) ** 2)
+        distance = math.sqrt((self.x - target_x) ** 2 + (self.y - target_y) ** 2)
 
         if distance <= self.radius:
             return -self.damage
         else:
             return 0
       
-    def draw(self, game_window, x, y, elapsed_time):
+    def draw(self, game_window, off_x, off_y, play, elapsed_time):
         # Se estiver dentro do período em que a arma deve ser desenhada, desenha
-        if elapsed_time - self.activation_time <= self.draw_duration:
-            pygame.draw.rect(game_window, self.color, pygame.Rect(x, y, self.size, self.size))
-            #pygame.draw.rect(game_window, self.color, (x, y), self.size)
 
+        X = self.x
+        Y = self.y
 
-    def on_cooldown(self, elapsed_time):
-        # Se ainda estiver no cooldown, retorna True
-        if elapsed_time - self.activation_time < self.cooldown:
-            return True
+        if self.can_drop(elapsed_time):
+            print("Cooldown")
+            X = play.x - off_x
+            Y = play.y - off_y
+
+            self.x = X
+            self.y = Y
         else:
-            # Atualiza o tempo de ativação e retorna False (não está em cooldown)
-            self.activation_time = elapsed_time
-            return False
+            self.x = X
+            self.y = Y
+
+        if elapsed_time - self.activation_time < self.draw_duration:
+            pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
         
-    def lauch_projectile(self, x, y, elapsed_time):
-        if elapsed_time % self.cooldown == 0 and elapsed_time != 0:
-            return x, y
-        else:
-            return 0, 0
+    def can_activate(self, elapsed_time):
+        return elapsed_time - self.activation_time >= self.cooldown
+
+    def activate(self, elapsed_time):
+        self.activation_time = elapsed_time
+        
+    def can_drop(self, elapsed_time):
+        return elapsed_time - self.activation_time >= self.drop
