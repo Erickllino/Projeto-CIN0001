@@ -3,7 +3,7 @@ import random
 import math
 
 from weapons import Basic_attack
-from weapons import Book
+from weapons import Book, Bottle
 
 from Enemies import Enemy_one
 
@@ -24,10 +24,9 @@ class Vampire_Cinvivals:
         Vampire_Cinvivals._instancia = self  # Registra a instância
         self.offset_x = 0  # Novo atributo
         self.offset_y = 0  # Novo atributo
-        # Tamanho da tela
-
+        self.bottles = [] # As Garrafas lançadas
+        # Tamanho da tel
         self.w = w
-
         self.h = h
 
         # Inicializa a tela
@@ -50,19 +49,15 @@ class Vampire_Cinvivals:
 
         self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão
 
-        
-
         # Inicializa o spawn de inimigos
 
         self.last_spawn = 0
 
-
-
         # Inicializa as armas, pode ser adicionado mais armas
 
-        self.active_weapons = {'Cracha':Basic_attack()}
+        self.active_weapons = {'Cracha':Basic_attack(), "Garrafa": Bottle()}
 
-        self.all_weapons = ['Cracha', 'Book']
+        self.all_weapons = ['Cracha', 'Book', "Garrafa"]
 
         # fases
 
@@ -216,12 +211,12 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
 
-        leveling_up = True
-
-  
+ 
 
         selected_keys = random.sample(list(player.upgrades.keys()), 3)
+        leveling_up = True
 
+ 
         selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
 
 
@@ -353,11 +348,6 @@ class Vampire_Cinvivals:
             pygame.display.flip()
 
 
-
-
-
-
-
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
@@ -451,8 +441,6 @@ class Vampire_Cinvivals:
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 
-       
-
         print(f'Player at: {player.x, player.y}')
 
         # Update invulnerability
@@ -496,10 +484,9 @@ class Vampire_Cinvivals:
             
 
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
-
+            if weapon == "Garrfa":
+                
             weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
-
-
 
             # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
@@ -521,11 +508,6 @@ class Vampire_Cinvivals:
 
                         enemy.make_invulnerable(elapsed_time)
 
-
-
-            
-
-            
 
         # Upgrade Basic_attack
 
@@ -692,11 +674,9 @@ game = Vampire_Cinvivals(1200, 800)
 player = Player(x=2000, y=4800)
 
 enemies = []
-<<<<<<< HEAD
-books = []
-=======
 
->>>>>>> main
+bottles = []
+
 game_over = False
 
 try_again = True 
