@@ -1,8 +1,6 @@
 import pygame
 import math
 
-
-
 class Basic_attack:
     def __init__(self):
         # Atributos essenciais da arma
@@ -105,16 +103,46 @@ class Bottle:
         self.x = x
         self.y = y
         self.temp = temp
-        self.imagem = pygame.image.load("./sprites/garrafa.png")
+        self.imagem = pygame.image.load("./sprites/garrafa/garrafa.png")
         self.imagem = pygame.transform.scale(self.imagem, (20, 40))
+        self.damage = 2
    
-    def draw(self, screen, offset_x, offset_y):
-
-        screen.blit(self.imagem, (self.x-offset_x, self.y-offset_y))
+    def draw(self, screen, diff_tempo, offset_x, offset_y):
+        dimensao_explocao = (40, 40)
+        ponto = (self.x - offset_x, self.y - offset_y)
+        if diff_tempo < 3:
+            self.imagem = pygame.image.load("./sprites/garrafa/garrafa.png")
+            self.imagem = pygame.transform.scale(self.imagem, (20, 40))
+        elif diff_tempo < 3.16:
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao1.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        elif diff_tempo < 3.32:
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao2.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        elif diff_tempo < 3.48:
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao3.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        elif diff_tempo < 3.64:
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao4.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        elif diff_tempo < 3.80:
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao5.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        else:            
+            self.imagem = pygame.image.load("./sprites/garrafa/explosao6.png")
+            self.imagem = pygame.transform.scale(self.imagem, dimensao_explocao)
+        
+        screen.blit(self.imagem, ponto)
     
+    def check_hit(self, opp_x, opp_y):
+        distance = math.sqrt((self.x - opp_x) ** 2 + (self.y - opp_y) ** 2)
+        if distance <= 40:
+            return -self.damage
+        return 0
+
     def estado(self, tempo, screen, offset_x, offset_y):
         if tempo - self.temp < 4:
-            self.draw(screen, offset_x, offset_y)
+            self.draw(screen, tempo - self.temp, offset_x, offset_y)
             return False
         return True
 

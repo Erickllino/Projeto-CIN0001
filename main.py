@@ -49,11 +49,7 @@ class Vampire_Cinvivals:
 
         # Cria a máscara de colisão, se quiser usar uma mascara diferente, basta trocar o arquivo
 
-<<<<<<< HEAD
-        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão
-=======
-        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão        
->>>>>>> main
+        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão     
 
         # Inicializa o spawn de inimigos
 
@@ -456,7 +452,7 @@ class Vampire_Cinvivals:
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
             if weapon == "Garrafa":
                 remover = []
-                if time.time() - self.time  >= 0.5:
+                if time.time() - self.time  >= 0.8:
                     print(len(self.bottles))
                     self.bottles.append(Bottle(player.x, player.y, time.time()))
                     self.time = time.time() 
@@ -470,15 +466,11 @@ class Vampire_Cinvivals:
 
             else:
 
-<<<<<<< HEAD
                 weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
 
                 # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
                 if weapon_instance.can_activate(elapsed_time):
-=======
-            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
->>>>>>> main
 
                     weapon_instance.activate(elapsed_time)
 
@@ -496,13 +488,10 @@ class Vampire_Cinvivals:
 
                             enemy.make_invulnerable(elapsed_time)
 
-<<<<<<< HEAD
-=======
-                        enemy.make_invulnerable(elapsed_time)
+                        
 
 
 
->>>>>>> main
 
         # Upgrade Basic_attack
 
