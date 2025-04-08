@@ -2,55 +2,65 @@ import pygame
 import math
 import random
 
-class Enemy_one:
-    def __init__(self, x, y):
-        # Posição inicial do inimigo
+class Enemy:
+    def __init__(self, x, y, sprite_path, frame_counts, scale, life=10, speed=1.0, damage=1):
         self.x = random.randint(0, x)
         self.y = random.randint(0, y)
-        self.life = 10
-        self.speed = 1.0  # Aumentado para compensar o tamanho maior
-        
+        self.life = life
+        self.speed = speed
+        self.damage = damage
+
         self.invulnerable = False
         self.invulnerable_time = 1
         self.last_hit_time = 0
-        
-        # Animação com escala
-        self.frames = [
-            pygame.transform.scale(
-                pygame.image.load(f"sprites/zombie/andando/frame{i}.png").convert_alpha(),
-                (50, 50)
-            )
-            for i in range(10)
-        ]
+
+        # Carrega animações
+        self.frames = self.load_frames(f"{sprite_path}/andando", frame_counts['andando'], scale)
+        self.death_frames = self.load_frames(f"{sprite_path}/morrendo", frame_counts['morrendo'], scale)
+        self.atack_frames = self.load_frames(f"{sprite_path}/atacando", frame_counts['atacando'], scale)
+
         self.current_frame = 0
         self.frame_timer = 0
-        self.frame_speed = 0.1  # Diminua para animação mais lenta
+        self.frame_speed = 0.1
 
-        # Máscara do inimigo baseada no primeiro frame
+        self.is_dying = False
+        self.death_frame_index = 0
+        self.death_frame_timer = 0
+        self.death_frame_speed = 0.1
+        self.marked_for_removal = False 
+
+        self.atack = False
+        self.atack_frame_index = 0
+        self.atack_frame_timer = 0
+        self.atack_frame_speed = 0.1
+        self.atack_sound = pygame.mixer.Sound("sprites/sons_effects/zombie_atack.wav")
+
         self.mask = pygame.mask.from_surface(self.frames[0])
+        self.moving_left = False
+
+    def load_frames(self, path, count, scale):
+        return [
+            pygame.transform.scale(pygame.image.load(f"{path}/frame{i}.png").convert_alpha(), scale)
+            for i in range(count)
+        ]
 
     def move(self, player, mask):
+        if self.is_dying or self.atack:
+            return
         dx = player.x - self.x
         dy = player.y - self.y
         distance = math.hypot(dx, dy)
-        
-        
-        self.moving_left = False
-        if dx < 0:
-            self.moving_left = True
-        elif dx> 0:
-            self.moving_left = False
-            
-        
+        self.moving_left = dx < 0
+
+        if distance < 20:
+            self.atack = True
+            return
 
         if distance > 0:
             dx /= distance
             dy /= distance
-
         new_x = self.x + dx * self.speed
         new_y = self.y + dy * self.speed
-
-        # Posições futuras para checar colisão
         future_pos_x = (int(new_x) - 32, int(self.y) - 32)
         future_pos_y = (int(self.x) - 32, int(new_y) - 32)
 
@@ -60,12 +70,16 @@ class Enemy_one:
             self.y = new_y
 
     def draw(self, game_window, offset_x, offset_y):
-        self.frame_timer += self.frame_speed
-        if self.frame_timer >= 1:
-            self.current_frame = (self.current_frame + 1) % len(self.frames)
-            self.frame_timer = 0
-
-        frame_image = self.frames[self.current_frame]
+        if self.is_dying:
+            frame_image = self.death_frames[min(self.death_frame_index, len(self.death_frames) - 1)]
+        elif self.atack:
+            frame_image = self.atack_frames[min(self.atack_frame_index, len(self.atack_frames) - 1)]
+        else:
+            self.frame_timer += self.frame_speed
+            if self.frame_timer >= 1:
+                self.current_frame = (self.current_frame + 1) % len(self.frames)
+                self.frame_timer = 0
+            frame_image = self.frames[self.current_frame]
 
         if self.moving_left:
             frame_image = pygame.transform.flip(frame_image, True, False)
@@ -74,61 +88,58 @@ class Enemy_one:
         game_window.blit(frame_image, draw_rect.topleft)
 
     def update_invulnerability(self, current_time):
-        if self.invulnerable:
-            if current_time - self.last_hit_time >= self.invulnerable_time:
-                self.invulnerable = False
+        if self.invulnerable and current_time - self.last_hit_time >= self.invulnerable_time:
+            self.invulnerable = False
 
     def make_invulnerable(self, current_time):
         self.invulnerable = True
         self.last_hit_time = current_time
-        
-class Enemy_two:
+
+
+    def update_death(self, current_time):
+        if self.is_dying:
+            self.death_frame_timer += self.death_frame_speed
+            if self.death_frame_timer >= 1:
+                self.death_frame_index += 1
+                self.death_frame_timer = 0
+                if self.death_frame_index >= len(self.death_frames):
+                    self.marked_for_removal = True
+
+    def update_atack(self, current_time, player):
+        if self.atack:
+            self.atack_frame_timer += self.atack_frame_speed
+            if self.atack_frame_timer >= 1:
+                self.atack_frame_index += 1
+                self.atack_frame_timer = 0
+                if self.atack_frame_index >= len(self.atack_frames):
+                    self.atack = False
+                    self.atack_frame_index = 0
+                    self.atack_sound.play()
+                    distance = math.hypot(player.x - self.x, player.y - self.y)
+                    if distance < 20 and not player.invulnerable:
+                        player.health -= self.damage
+                        player.make_invulnerable(current_time)
+                        
+class ZombieOne(Enemy):
     def __init__(self, x, y):
-        # Posição inicial do inimigo
-        self.x = random.randint(0, x)
-        self.y = random.randint(0, y)
-        self.life = 10
-        self.speed = 0.5
-        
-        self.invulnerable = False
-        self.invulnerable_time = 1
-        self.last_hit_time = 0
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombie1",
+            frame_counts={"andando": 10, "morrendo": 6, "atacando": 5},
+            scale= (64,64),
+            life=10,
+            speed=1.0,
+            damage=10
+        )
 
-    def move(self, player, mask):
-        # Faz o algoritmo de movimentação do inimigo
-        # Aqui ele se move em direção ao jogador diretamente
-        dx = player.x - self.x
-        dy = player.y - self.y
-        distance = math.sqrt(dx**2 + dy**2)
-
-        if distance > 0:
-            dx /= distance
-            dy /= distance
-
-        new_x = self.x + dx * self.speed
-        new_y = self.y + dy * self.speed
-
-        # Check collision with map, a hitbox é um quadrado de 10x10 (5*2, 5*2)
-        if not mask.overlap_area(pygame.mask.Mask((5 * 2, 5 * 2), fill=True), (new_x - 5, self.y - 5)):
-            self.x = new_x
-        if not mask.overlap_area(pygame.mask.Mask((5 * 2, 5 * 2), fill=True), (self.x - 5, new_y - 5)):
-            self.y = new_y
-
-    def draw(self, game_window, offset_x, offset_y):
-
-        # Desenho do inimigo, se for trocar por uma imagem, use game_window.blit(imagem, (int(self.x - offset_x), int(self.y - offset_y)))
-        pygame.draw.circle(game_window, (255, 0, 0), (int(self.x - offset_x), int(self.y - offset_y)), 5)
-
-    # Replace the get_invunerable method with this:
-    def update_invulnerability(self, current_time):
-        if self.invulnerable:
-            # Check if invulnerability period has ended
-            if current_time - self.last_hit_time >= self.invulnerable_time:
-                self.invulnerable = False
-                
-    def make_invulnerable(self, current_time):
-        self.invulnerable = True
-        self.last_hit_time = current_time
-
-
-        
+class ZombieTwo(Enemy):
+    def __init__(self, x, y):
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombie2",
+            frame_counts={"andando": 10, "morrendo": 5, "atacando": 4},
+            scale= (98,98),
+            life=20,
+            speed=2,
+            damage=4
+        )
