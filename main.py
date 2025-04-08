@@ -7,7 +7,7 @@ from weapons import Book
 
 from Enemies import ZombieOne, ZombieTwo
 
-from player import Player
+from PlayerCharacter import Player
 
 from gerenciador_fases import GerenciadorFases
 from fases import Fase, dados_fase1, dados_fase2, dados_fase3, dados_fase4
@@ -17,147 +17,6 @@ pygame.font.init()
 clock = pygame.time.Clock()
 my_font = pygame.font.SysFont('Comic Sans MS', 20)
 
-
-class Player:
-    def __init__(self, x, y, radius=10, color=(255, 0, 0)):
-        # Posição do jogador
-        self.x = x
-        self.y = y
-        # Posição do jogador na tela
-        self.draw_x = 0
-        self.draw_y = 0
-        # Características do jogador
-        self.level = 1
-        self.xp = 0
-        self.health = 100
-        self.speed = 4
-        
-        self.invulnerable = False
-        self.invulnerable_time = 1
-        self.last_hit_time = 0
-
-        # Desenho do jogador
-        self.radius = radius
-        self.color = color      
-        
-        self.frame = 0
-        self.animation_speed = 0.1
-        self.last_update = 0
-        self.direction = 'right'
-        self.moving = False
-        self.sprites = {
-            "right": [pygame.image.load(f"sprites/personagem_direita/frame{i}.png") for i in range(8)],
-            "left": [pygame.image.load(f"sprites/personagem_esquerda/frame{i}.png") for i in range(8)]
-        }
-        self.sprite_width = 64
-        self.sprite_height = 64
-    
-        for direction in self.sprites:
-            self.sprites[direction] = [pygame.transform.scale(sprite, (self.sprite_width, self.sprite_height)) 
-                                     for sprite in self.sprites[direction]]
-        #som da catraca 
-        self.som_catraca = pygame.mixer.Sound("sprites/sons_effects/catraca.wav")
-        self.som_catraca_tocado = False  # Agora está dentro da classe e controlado certinho
-
-        
-    def update_invulnerability(self, current_time):
-        if self.invulnerable:
-            # Check if invulnerability period has ended
-            if current_time - self.last_hit_time >= self.invulnerable_time:
-                self.invulnerable = False
-    
-    def make_invulnerable(self, current_time):
-        self.invulnerable = True
-        self.last_hit_time = current_time
-    
-    def hitbox(self):
-        return pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius * 2, self.radius * 2)
-    
-    def move(self, keys, map_size, mask):
-        dx, dy = 0, 0
-        self.moving = False
-
-        if keys[pygame.K_LEFT]:
-            dx = -self.speed
-            self.direction = 'left'
-            self.moving = True
-        if keys[pygame.K_RIGHT]:
-            dx = self.speed
-            self.direction = 'right'
-            self.moving = True
-        if keys[pygame.K_UP]:
-            dy = -self.speed    
-            self.moving = True
-        if keys[pygame.K_DOWN]:
-            dy = self.speed
-            self.moving = True
-        if keys[pygame.K_TAB]:
-            pygame.quit()
-
-        # Sprite e máscara
-        sprite = self.sprites[self.direction][int(self.frame)]
-        player_mask = pygame.mask.from_surface(sprite)
-
-        # — Movimento horizontal (X) —
-        new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))
-        offset_x = int(new_x - self.sprite_width // 2)
-        offset_y = int(self.y - self.sprite_height // 2)
-
-        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
-            self.x = new_x
-
-        # — Movimento vertical (Y) —
-        new_y = max(self.radius, min(map_size[1] - self.radius, self.y + dy))
-        offset_x = int(self.x - self.sprite_width // 2)  # já atualizado
-        offset_y = int(new_y - self.sprite_height // 2)
-
-        if mask.overlap(player_mask, (offset_x, offset_y)) is None:
-            self.y = new_y
-
-
-    def update_som_catraca(self):
-        if 2050 <= self.x <= 2210 and 4600 < self.y < 4500:
-
-            if not self.som_catraca_tocado:     
-                self.som_catraca.play()
-                self.som_catraca.play()
-                self.som_catraca_tocado = True
-        else:
-            self.som_catraca_tocado = False 
-
-    def update_animation(self, current_time):
-        if self.moving:
-            
-            if current_time -self.last_update >= self.animation_speed:
-                self.frame = (self.frame + 1) %8 #8 frames de animação
-                self.last_update = current_time
-        else:
-            self.frame = 0 #volta pro primeirp frma quando para
-            
-            
-    def draw(self, game_window, center, map_size, window_size, offset_x, offset_y):
-    # Atualiza a animação com o tempo atual
-        current_time = pygame.time.get_ticks() / 1000  # Em segundos
-        self.update_animation(current_time)
-
-        # Mantém o jogador no centro da tela
-        if self.x > window_size[0] // 2 and self.x < map_size[0] - window_size[0] // 2:
-            draw_x = center[0]
-        else:
-            draw_x = self.x - offset_x
-
-        if self.y > window_size[1] // 2 and self.y < map_size[1] - window_size[1] // 2:
-            draw_y = center[1]
-        else:
-            draw_y = self.y - offset_y
-
-        self.draw_x = draw_x
-        self.draw_y = draw_y
-        
-        # Desenha o sprite animado do jogador
-        current_sprite = self.sprites[self.direction][self.frame]
-        sprite_rect = current_sprite.get_rect(center=(int(draw_x), int(draw_y)))
-        game_window.blit(current_sprite, sprite_rect)
 
 class Vampire_Cinvivals:
 
@@ -241,6 +100,7 @@ class Vampire_Cinvivals:
                     if event.key == pygame.K_RETURN:
 
                         menu_ativo = False
+                        break
 
 
 
@@ -665,7 +525,7 @@ class Vampire_Cinvivals:
 
                         enemy.make_invulnerable(elapsed_time)
 
-            weapon_instance.draw(self.display, player.draw_x, player.draw_y, elapsed_time)
+
 
 
         # Upgrade Basic_attack
@@ -832,7 +692,8 @@ class Vampire_Cinvivals:
         #x=2050 a 2210 y= 4600
 
 game = Vampire_Cinvivals(1200, 800)
-player = Player(x=2100, y= 4800)
+
+play = Player(x=2100, y= 4800)
 
 enemies = []
 
@@ -857,7 +718,7 @@ while try_again:
 
 
 
-        game_over = game.play_step(player, enemies, elapsed_time)
+        game_over = game.play_step(play, enemies, elapsed_time)
 
 
 

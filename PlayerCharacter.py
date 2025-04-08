@@ -107,7 +107,16 @@ class Player:
         else:
             self.frame = 0 #volta pro primeirp frma quando para
             
-            
+    def update_som_catraca(self):
+        if 2050 <= self.x <= 2210 and 4600 < self.y < 4500:
+
+            if not self.som_catraca_tocado:     
+                self.som_catraca.play()
+                self.som_catraca.play()
+                self.som_catraca_tocado = True
+        else:
+            self.som_catraca_tocado = False
+                         
     def draw(self, game_window, center, map_size, window_size, offset_x, offset_y):
     # Atualiza a animação com o tempo atual
         current_time = pygame.time.get_ticks() / 1000  # Em segundos
@@ -132,3 +141,6 @@ class Player:
         current_sprite = self.sprites[self.direction][self.frame]
         sprite_rect = current_sprite.get_rect(center=(int(draw_x), int(draw_y)-15))
         game_window.blit(current_sprite, sprite_rect)
+
+
+
