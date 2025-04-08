@@ -116,7 +116,7 @@ class Enemy:
                     self.atack_frame_index = 0
                     self.atack_sound.play()
                     distance = math.hypot(player.x - self.x, player.y - self.y)
-                    if distance < 10 and not player.invulnerable:
+                    if distance < 20 and not player.invulnerable:
                         player.health -= self.damage
                         player.make_invulnerable(current_time)
                         
@@ -129,7 +129,7 @@ class ZombieOne(Enemy):
             scale= (64,64),
             life=10,
             speed=1.0,
-            damage=1
+            damage=10
         )
 
 class ZombieTwo(Enemy):

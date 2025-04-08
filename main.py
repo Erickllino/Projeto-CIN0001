@@ -49,15 +49,11 @@ class Vampire_Cinvivals:
 
         # Cria a máscara de colisão, se quiser usar uma mascara diferente, basta trocar o arquivo
 
-        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão
-
-        
+        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão        
 
         # Inicializa o spawn de inimigos
 
         self.last_spawn = 0
-
-
 
         # Inicializa as armas, pode ser adicionado mais armas
 
@@ -100,47 +96,31 @@ class Vampire_Cinvivals:
                     if event.key == pygame.K_RETURN:
 
                         menu_ativo = False
-                        break
-
-
+                        
 
             # Preenche a tela com uma cor de fundo
-
             # da pra colocar um imagem aqui
-
             game.display.fill((0, 0, 0))
-
-            
-
-
 
             menu_font = pygame.font.SysFont('Comic Sans MS', 50)
 
             # Renderiza o título e a mensagem de iniciar
-
             title_text = menu_font.render("Vampire Cinvivals", True, (255, 255, 255))
 
             prompt_text = my_font.render("Pressione Enter para iniciar", True, (255, 255, 255))
 
-            
-
             # Centraliza os textos na tela
-
             title_pos = (game.w // 2 - title_text.get_width() // 2, game.h // 2 - 100)
 
             prompt_pos = (game.w // 2 - prompt_text.get_width() // 2, game.h // 2)
 
             game.display.blit(title_text, title_pos)
-
             game.display.blit(prompt_text, prompt_pos)
 
-            
-
+        
             pygame.display.flip()
 
             clock.tick(60)
-
-
 
     def game_over(self):
 
@@ -213,8 +193,6 @@ class Vampire_Cinvivals:
             pygame.display.flip()
 
             clock.tick(60)
-
-
 
     def level_up(self, player):
 
@@ -399,7 +377,6 @@ class Vampire_Cinvivals:
 
                         leveling_up = False        
 
-
     def play_step(self, player, enemies, elapsed_time):
 
         # Eventos do jogo
@@ -438,7 +415,6 @@ class Vampire_Cinvivals:
 
         # Calcula o offset para manter o jogador no centro da tela
 
-
         offset_x = max(0, min(map_size[0] - window_size[0], player.x - window_size[0] / 2))
 
         offset_y = max(0, min(map_size[1] - window_size[1], player.y - window_size[1] / 2))
@@ -453,8 +429,6 @@ class Vampire_Cinvivals:
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 
-       
-
         print(f'Player at: {player.x, player.y}')
 
         # Update invulnerability
@@ -465,12 +439,7 @@ class Vampire_Cinvivals:
 
             enemy.update_invulnerability(elapsed_time)
 
-
-
-
-
         # Desenha as armas a serem colocadas no chão
-
         for weapon_instance in self.all_weapons:
 
             if weapon_instance not in self.active_weapons.keys():
@@ -487,29 +456,20 @@ class Vampire_Cinvivals:
 
                         self.active_weapons['Book'] = Book()
 
-
-
         # Weapons
-
         for weapon in self.active_weapons:
 
             weapon_instance = self.active_weapons[weapon]
-
-
-            
-
+        
             # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
 
             weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
-
-
 
             # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
             if weapon_instance.can_activate(elapsed_time):
 
                 weapon_instance.activate(elapsed_time)
-
 
                 for enemy in enemies:
 
@@ -605,30 +565,30 @@ class Vampire_Cinvivals:
 
         current_time = pygame.time.get_ticks() / 1000
 
-        for enemy_one in enemies:
+        for enemy in enemies:
 
-            enemy_one.move(player, self.mask)
+            enemy.move(player, self.mask)
 
-            enemy_one.update_death(current_time)
-            enemy_one.draw(self.display, offset_x, offset_y)
+            enemy.update_death(current_time)
+            enemy.draw(self.display, offset_x, offset_y)
 
 
         # Check if enemies hit player
 
-        for enemy_one in enemies:
+        for enemy in enemies:
 
             # Cálculo da distância
-            distance = math.sqrt((player.x - enemy_one.x) ** 2 + (player.y - enemy_one.y) ** 2)
+            distance = math.hypot(player.x - enemy.x, player.y - enemy.y)
 
             # Início do ataque (só acontece uma vez)
-            if distance < 10 and not player.invulnerable and not enemy_one.is_dying and not enemy_one.atack:
-                enemy_one.atack = True
-                enemy_one.atack_frame_timer = 0
-                enemy_one.atack_frame_index = 0
+            if distance < 20 and not player.invulnerable and not enemy.is_dying and not enemy.atack:
+                enemy.atack = True
+                enemy.atack_frame_timer = 0
+                enemy.atack_frame_index = 0
 
             # Atualiza a animação do ataque em todo frame, se estiver atacando
-            if enemy_one.atack:
-                enemy_one.update_atack(current_time, player)
+            if enemy.atack:
+                enemy.update_atack(current_time, player)
 
 
 
@@ -666,7 +626,6 @@ class Vampire_Cinvivals:
         self.display.blit(time_text, (self.w//2, 10))
 
 
-
         # Mostrar a vida do jogador
 
 
@@ -681,7 +640,6 @@ class Vampire_Cinvivals:
         self.display.blit(xp_text, (self.w//2, self.h - 30))
 
 
-
         pygame.display.flip()
 
         self.clock.tick(120)
@@ -693,7 +651,7 @@ class Vampire_Cinvivals:
 
 game = Vampire_Cinvivals(1200, 800)
 
-play = Player(x=2100, y= 4800)
+player = Player(x=2100, y= 4800)
 
 enemies = []
 
@@ -704,11 +662,9 @@ try_again = True
 start_time = pygame.time.get_ticks()  # Tempo inicial do jogo
 
 
-
 game.main_menu(game)
-
 while try_again:
-
+    
     while not game_over:
 
         # Calcula o tempo total de jogo em segundos
@@ -716,9 +672,7 @@ while try_again:
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
 
 
-
-
-        game_over = game.play_step(play, enemies, elapsed_time)
+        game_over = game.play_step(player, enemies, elapsed_time)
 
 
 
