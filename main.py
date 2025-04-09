@@ -50,10 +50,10 @@ class Vampire_Cinvivals:
         # Carrega o mapa
 
         self.Map = pygame.image.load("sprites/map.png").convert()  # Resolução da Imagem  3902x5055
-
+        self.walls = pygame.image.load("sprites/walls.png").convert()  # Resolução da Imagem  3902x5055
         # Cria a máscara de colisão, se quiser usar uma mascara diferente, basta trocar o arquivo
 
-        self.mask = pygame.mask.from_threshold(self.Map, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão     
+        self.mask = pygame.mask.from_threshold(self.walls, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão        
 
         # Inicializa o spawn de inimigos
 
@@ -384,8 +384,13 @@ class Vampire_Cinvivals:
                 return True
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                
+                quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                
+                del enemies[:]
 
-                return True
+                
 
         keys = pygame.key.get_pressed()
 
@@ -417,7 +422,7 @@ class Vampire_Cinvivals:
 
 
         # Renderizar elementos das fases
-        self.gerenciador_fases.desenhar(self.display)
+        self.gerenciador_fases.desenhar(self.display, offset_x, offset_y)
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 
