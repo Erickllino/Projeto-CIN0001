@@ -82,8 +82,7 @@ class Player:
         if keys[pygame.K_DOWN]:
             dy = self.speed
             self.moving = True
-        if keys[pygame.K_TAB]:
-            pygame.quit()
+
 
 
         new_x = max(self.radius, min(map_size[0] - self.radius, self.x + dx))

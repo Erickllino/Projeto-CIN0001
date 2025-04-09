@@ -14,16 +14,38 @@ class Fase:
 
     def iniciar(self):
         if self.numero == 1:
-            self._criar_circulos(2)
+            self.circulos = [{
+                "posicao": (600, 900),  # Coordenada do grad5
+                "raio": 100,  # Aumentado para melhor visibilidade
+            }]
 
         elif self.numero == 2:
-            self._criar_circulos(4)
+            self.circulos = [{
+                "posicao": (1200, 1200),  # Coordenada do grad4
+                "raio": 100,  # Aumentado para melhor visibilidade
+            }, {
+                "posicao": (1400, 1250),  # Coordenada do grad2
+                "raio": 100,  # Aumentado para melhor visibilidade
+            }]
+
 
         elif self.numero == 3:
-            self._criar_circulos(3)
+            self.circulos = [{
+                "posicao": (600, 2750),  # Coordenada do grad4
+                "raio": 20,  # Aumentado para melhor visibilidade
+            }, {
+                "posicao": (3150, 3200),  # Coordenada do grad2
+                "raio": 20,  # Aumentado para melhor visibilidade
+            }, {
+                "posicao": (1900, 4600),  # Coordenada do grad2
+                "raio": 20,  # Aumentado para melhor visibilidade
+            }]
 
         elif self.numero == 4:
-            self._criar_circulos(1)
+            self.circulos = [{
+                "posicao": (3550, 4500),  # Coordenada próxima ao spawn do jogador
+                "raio": 20,  # Aumentado para melhor visibilidade
+            }]
     
     # essa função ta criando círculos aleatório pelo mapa
     #quando estiver com o mapa pronto e os objetos, tem que setar valores fixos para a criação dos círculos
