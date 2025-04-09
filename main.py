@@ -1,9 +1,8 @@
 import pygame
 import random
 import math
-
-from weapons import Basic_attack
-from weapons import Book
+import time
+from weapons import Basic_attack, Bottle
 
 from Enemies import ZombieOne, ZombieTwo
 
@@ -25,10 +24,15 @@ class Vampire_Cinvivals:
         Vampire_Cinvivals._instancia = self  # Registra a instância
         self.offset_x = 0  # Novo atributo
         self.offset_y = 0  # Novo atributo
+
+        self.bottles = [] # As Garrafas no chão
+        self.temp_garrafa = time.time() # Controla o tempo entre a criação das garrafas
+
+        # Metricas da garrafa dourada
+        self.temp_gold = time.time() # Tempo para controlar a aparição da garrada dourada
+        self.garrafa_dourada = '' # A garrada dourada será declado quando for aparecer
         # Tamanho da tela
-
         self.w = w
-
         self.h = h
 
         # Inicializa a tela
@@ -57,9 +61,9 @@ class Vampire_Cinvivals:
 
         # Inicializa as armas, pode ser adicionado mais armas
 
-        self.active_weapons = {'Cracha':Basic_attack()}
+        self.active_weapons = {'Cracha':Basic_attack(),}
 
-        self.all_weapons = ['Cracha', 'Book']
+        self.all_weapons = ['Cracha', "Garrafa", "Garrafa_dourada"]
 
         # fases
 
@@ -196,30 +200,23 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
 
-        leveling_up = True
-
-  
+ 
 
         selected_keys = random.sample(list(player.upgrades.keys()), 3)
+        leveling_up = True
 
+ 
         selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
 
 
 
         while leveling_up:
 
-            
-
             # tamanho do retângulo
-
             up_size = self.w//4
 
-
-
             # Renderiza cada linha e posiciona no retângulo
-
             def blit_text(display, text_lines, rect, font, color=(255,255,255)):
-
                 line_height = font.get_linesize()
 
                 total_text_height = len(text_lines) * line_height
@@ -333,11 +330,6 @@ class Vampire_Cinvivals:
             pygame.display.flip()
 
 
-
-
-
-
-
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
@@ -443,79 +435,102 @@ class Vampire_Cinvivals:
         for enemy in enemies:
 
             enemy.update_invulnerability(elapsed_time)
+        
 
         # Desenha as armas a serem colocadas no chão
         for weapon_instance in self.all_weapons:
 
             if weapon_instance not in self.active_weapons.keys():
 
-                if weapon_instance == 'Book':
-
-                    screen_x = 1800- offset_x
-
+                if weapon_instance == 'Garrafa':
+                    screen_x = 1800 - offset_x
                     screen_y = 3330 - offset_y
-
-                    pygame.draw.circle(self.display, (255, 0, 100), (int(screen_x), int(screen_y)), 10)
-
+                    imagem = pygame.image.load("./sprites/garrafa/garrafa.png")
+                    imagem = pygame.transform.scale(imagem, (20, 40))
+                    self.display.blit(imagem, (int(screen_x), int(screen_y)))
                     if player.hitbox().colliderect(pygame.Rect(1800 - 10, 3330 - 10, 20, 20)):
-
-                        self.active_weapons['Book'] = Book()
+                        self.active_weapons['Garrafa'] = ""
+ 
+            if weapon_instance == 'Garrafa_dourada' and time.time() - self.temp_gold >= 20:
+                screen_x = 1820 - offset_x
+                screen_y = 3350 - offset_y
+                imagem = pygame.image.load("./sprites/garrafa/garrafa_dourada.png")
+                imagem = pygame.transform.scale(imagem, (50, 60))
+                self.display.blit(imagem, (int(screen_x), int(screen_y)))
+                    
+                if player.hitbox().colliderect(pygame.Rect(1800 - 10, 3330 - 10, 20, 20)):
+                    self.active_weapons['Garrafa_dourada'] = True
+                    self.temp_gold = time.time()
+                    time.sleep(1)
 
         # Weapons
         for weapon in self.active_weapons:
 
             weapon_instance = self.active_weapons[weapon]
         
-            # Chama o método draw sempre, que internamente verificará se deve desenhar ou não
+            # Ações das armas de acordo com o seu tipo
+            if weapon == "Garrafa":
+                remover = []
+                if time.time() - self.temp_garrafa >= 0.5:
+                    self.bottles.append(Bottle(player.x, player.y, time.time()))
+                    self.temp_garrafa = time.time() 
+                for i in range(len(self.bottles)):
+                    bottle = self.bottles[i]                
+                    isAtivo = bottle.estado(time.time(), self.display, offset_x, offset_y)
+                    if isAtivo:
+                        for enemy in enemies:
+                          
+                          enemy.life += bottle.check_hit(enemy.x, enemy.y, offset_x, offset_y)
 
-            weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
+                        remover.append(i)
+                for x in remover:
+                    try:                            
+                        del self.bottles[x]
+                    except IndexError:
+                        pass  
+            elif weapon == "Garrafa_dourada":
+                if weapon_instance:
+                    for enemy in enemies:
+                        enemy.life -= enemy.life
+                    self.active_weapons[weapon] = False
 
-            # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
+            else:
 
-            if weapon_instance.can_activate(elapsed_time):
+                weapon_instance.draw(self.display,offset_x,offset_y, player, elapsed_time)
 
-                weapon_instance.activate(elapsed_time)
+                # Se a arma não estiver em cooldown, atualiza a ativação (e aplica o efeito)
 
-                for enemy in enemies:
+                if weapon_instance.can_activate(elapsed_time):
 
-                    if not enemy.invulnerable:
+                    weapon_instance.activate(elapsed_time)
 
-                        enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
+                    for enemy in enemies:
 
-                        if player.health < player.max_health:
+                        if not enemy.invulnerable:
 
-                            player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+                            enemy.life += weapon_instance.check_hit(enemy.x, enemy.y, player.x, player.y, elapsed_time)
+
+                            if player.health < player.max_health:
+
+                                player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
+
+                            
+                            enemy.make_invulnerable(elapsed_time)
 
                         
-
-                        enemy.make_invulnerable(elapsed_time)
-
-
-
-
         # Upgrade Basic_attack
 
         if player.xp >= 10*(1.1**(player.level-1)) and player.xp != 0:
-
            self.level_up(player)
-
            player.xp = 0
-
            player.level += 1
 
-      
-
         # Spawn Enemies
-
         if len(enemies) <= 3000:
-
             spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
 
         else:
-
             spawn_rate = 30
-
-        
 
         if elapsed_time != self.last_spawn:
 
@@ -659,6 +674,8 @@ game = Vampire_Cinvivals(1200, 800)
 player = Player(x=2100, y= 4800)
 
 enemies = []
+
+bottles = []
 
 game_over = False
 
