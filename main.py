@@ -55,8 +55,15 @@ class Vampire_Cinvivals:
 
         self.mask = pygame.mask.from_threshold(self.walls, (0, 0, 0), (2, 2, 2))  # Cria a máscara de colisão        
 
-        # Inicializa o spawn de inimigos
+        # Inicializa o som de level up
+        self.level_up_sound = pygame.mixer.Sound("sprites/sons_effects/level_up.mp3")
 
+
+
+        # Inicializa o som de morte
+        self.game_over_sound = pygame.mixer.Sound("sprites/sons_effects/game_over.mp3")
+
+        # Inicializa o spawn de inimigos
         self.last_spawn = 0
 
         # Inicializa as armas, pode ser adicionado mais armas
@@ -129,7 +136,8 @@ class Vampire_Cinvivals:
     def game_over(self):
 
         game_over = True
-
+        self.game_over_sound.play()
+        
         while game_over:
 
             for event in pygame.event.get():
@@ -170,17 +178,9 @@ class Vampire_Cinvivals:
 
             self.display.fill((0, 0, 0))
 
-            
-
-           
-
-            
-
             title_text = my_font.render("Você Morreu", False, (255, 255, 255))
 
             prompt_text = my_font.render("Aperte esc para sair", True, (255, 255, 255))
-
-            
 
             # Centraliza os textos na tela
 
@@ -201,19 +201,22 @@ class Vampire_Cinvivals:
     def level_up(self, player):
 
  
-
+        # Seleciona 3 upgrades aleatórios
         selected_keys = random.sample(list(player.upgrades.keys()), 3)
-        leveling_up = True
 
- 
+        # Cria um dicionário com os upgrades selecionados e suas respectivas funções
         selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
 
-
+        # Inicializa o som de level up
+        leveling_up = True
+        self.level_up_sound.play()
 
         while leveling_up:
-
+            
+            
             # tamanho do retângulo
             up_size = self.w//4
+            
 
             # Renderiza cada linha e posiciona no retângulo
             def blit_text(display, text_lines, rect, font, color=(255,255,255)):
@@ -270,10 +273,11 @@ class Vampire_Cinvivals:
             # Configura a fonte do Texto do upgrade
 
             font = pygame.font.SysFont('Arial', 30)
-
+            Level_up_font = pygame.font.SysFont('Arial', 50)
             max_text_width = up_size - 10  # margem
-
-
+            
+            tittle = font.render('Level UP!', True, (255,255,0))
+            self.display.blit(tittle, ((self.w - up_size) // 2 - tittle.get_width()//2, self.h//2 - tittle.get_height()//2 - up_size))
 
             lines1 = wrap_text(selected_upgrades[selected_keys[0]][0], font, max_text_width)
 
@@ -426,7 +430,7 @@ class Vampire_Cinvivals:
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 
-        print(f'Player at: {player.x, player.y}')
+        #print(f'Player at: {player.x, player.y}')
 
         # Update invulnerability
 
@@ -512,6 +516,7 @@ class Vampire_Cinvivals:
 
                             if player.health < player.max_health:
 
+                                
                                 player.health -= (player.life_steal)*weapon_instance.check_hit(player.x, player.y, enemy.x, enemy.y, elapsed_time)
 
                             
@@ -526,7 +531,7 @@ class Vampire_Cinvivals:
            player.level += 1
 
         # Spawn Enemies
-        if len(enemies) <= 3000:
+        if len(enemies) <= 1000:
             spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
 
         else:
@@ -560,7 +565,7 @@ class Vampire_Cinvivals:
 
                     if not (visible_x_min <= spawn_x <= visible_x_max and visible_y_min <= spawn_y <= visible_y_max):
 
-                        print(f'Player at: {player.x, player.y}, Enemy at: {spawn_x, spawn_y}')
+                        
 
                         bool_spawn = False
 
@@ -573,7 +578,7 @@ class Vampire_Cinvivals:
 
                 cracha_radius = self.active_weapons['Cracha'].radius
 
-                print(f'Number of Enemies: {len(enemies)},Health {player.health}, XP: {player.xp}, Basic_attack radius: {cracha_radius}')
+                
 
                 self.last_spawn = elapsed_time
 
@@ -641,9 +646,9 @@ class Vampire_Cinvivals:
 
         # Mostrar o tempo total de jogo
 
-        time_text = my_font.render(f'Time: {elapsed_time}s', True, (255, 255, 0))
+        #time_text = my_font.render(f'Time: {elapsed_time}s', True, (255, 255, 0))
 
-        self.display.blit(time_text, (self.w//2, 10))
+        #self.display.blit(time_text, (self.w//2, 10))
 
 
         # Mostrar a vida do jogador

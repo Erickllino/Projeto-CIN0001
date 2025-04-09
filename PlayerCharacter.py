@@ -18,12 +18,15 @@ class Player:
         self.life_steal = 0
         
         self.invulnerable = False
-        self.invulnerable_time = 1
+        self.invulnerable_time = 0.5
         self.last_hit_time = 0
 
         # Desenho do jogador
         self.radius = radius
-        self.color = color      
+        self.color = color
+
+        # Inicializa o som de dano recebido
+        self.player_gets_damaged_sound = pygame.mixer.Sound("sprites/sons_effects/player_gets_damaged.mp3")      
                 
         # Possiveis upgrades ao upar de nivel
         self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.max_health *= 1.1 ; player.health *= 1.1'],

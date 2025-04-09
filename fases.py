@@ -21,11 +21,11 @@ class Fase:
 
         elif self.numero == 2:
             self.circulos = [{
-                "posicao": (1200, 1200),  # Coordenada do grad4
-                "raio": 100,  # Aumentado para melhor visibilidade
+                "posicao": (1600, 1300),  # Coordenada do grad4
+                "raio": 200,  # Aumentado para melhor visibilidade
             }, {
-                "posicao": (1400, 1250),  # Coordenada do grad2
-                "raio": 100,  # Aumentado para melhor visibilidade
+                "posicao": (2100, 1300),  # Coordenada do grad2
+                "raio": 200,  # Aumentado para melhor visibilidade
             }]
 
 
@@ -99,24 +99,24 @@ class Fase:
                 self.esta_concluida = True
                 self.circulos = []
 
-            print(tempo_atual, self.tempo_inicial, self.contador)
+            #print(tempo_atual, self.tempo_inicial, self.contador)
 
     def desenhar(self, tela, offset_x, offset_y):
 
         fonte = pygame.font.Font(None, 36)
-        texto = fonte.render(self.instrucoes, True, (200, 200, 200))  # Cinza
-        tela.blit(texto, (20, 20))
+        texto = fonte.render(self.instrucoes, True, (255, 255, 0))  # Cinza
+        tela.blit(texto, (20, 60))
 
         # Timer na tela
         if (self.numero == 1 or self.numero == 2) and not self.esta_concluida:
             tempo_restante = max(0, self.objetivos - self.contador)
-            timer_texto = fonte.render(f"Tempo necessário restante: {tempo_restante}s", True, (200, 200, 200))
-            tela.blit(timer_texto, (20, 60))
+            timer_texto = fonte.render(f"Tempo necessário restante: {tempo_restante}s", True, (255, 255, 0))
+            tela.blit(timer_texto, (20, 100))
 
         elif (self.numero == 3 or self.numero == 4)and not self.esta_concluida:
             objetos_restantes =  self.objetivos - self.contador
-            timer_texto = fonte.render(f"Objetivos não coletados: {objetos_restantes}s", True, (200, 200, 200))
-            tela.blit(timer_texto, (20, 60))
+            timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}", True, (255, 255, 200))
+            tela.blit(timer_texto, (20, 100))
 
         for circulo in self.circulos:
             x = circulo["posicao"][0] - offset_x
@@ -129,21 +129,21 @@ class Fase:
 # Configuração ajustada
 dados_fase1 = {
     "numero": 1,
-    "objetivos": 20,  # 30 segundos dentro do círculo
+    "objetivos": 10,  # 10 segundos dentro do círculo
     "instrucoes": "Fique no círculo vermelho por 10 segundos!"
 }
 
 dados_fase2 = {
     "numero": 2,
-    "objetivos": 40,  # 10 segundos dentro do círculo
-    "instrucoes": "Um zumbi louco atacou a energia do grad em que você estava, vá para um novo grad e termine a segunda questão da lista!!"
+    "objetivos": 20,  # 20 segundos dentro do círculo
+    "instrucoes": "Um zumbi louco atacou a energia do grad em que você estava!\n vá para um novo grad e termine a segunda questão da lista!!"
 }
 
 dados_fase3 = {
 
     "numero": 3,
     "objetivos": 3,  # 10 segundos dentro do círculo
-    "instrucoes": "você já tinha feito o código anteriormente, porém foi no papel a agora deve coletar os papéis rasgados pelo mapa para finalizar a questão 3!!!"
+    "instrucoes": "você já tinha feito o código anteriormente,\n porém foi no papel a agora deve coletar os papéis rasgados pelo mapa para finalizar a questão 3!!!"
 }
 
 dados_fase4 = {

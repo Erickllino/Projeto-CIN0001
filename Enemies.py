@@ -118,6 +118,8 @@ class Enemy:
                     distance = math.hypot(player.x - self.x, player.y - self.y)
                     if distance < 20 and not player.invulnerable:
                         player.health -= self.damage
+                        player.player_gets_damaged_sound.play()
+                        player.player_gets_damaged_sound.set_volume(0.1)  # Reduz o som
                         player.make_invulnerable(current_time)
                         
 class ZombieOne(Enemy):

@@ -143,7 +143,7 @@ class Bottle:
         distance = math.sqrt((self.x - opp_x) ** 2 + (self.y - opp_y) ** 2)
         
         if distance <= 60:
-            print(distance)
+            
 
             return -self.damage
         return 0
