@@ -5,7 +5,7 @@ import math
 from weapons import Basic_attack
 from weapons import Book
 
-from Enemies import ZombieOne, ZombieTwo
+from Enemies import ZombieOne, ZombieTwo, ZombieBoss
 
 from PlayerCharacter import Player
 
@@ -54,6 +54,9 @@ class Vampire_Cinvivals:
         # Inicializa o spawn de inimigos
 
         self.last_spawn = 0
+        self.boss_spawn_time = 1  # 1 minutos para o primeiro spawn
+        self.boss_respawn_delay = 120   # 2 minutos para reaparecer após a morte
+        self.last_boss_death_time = None
 
         # Inicializa as armas, pode ser adicionado mais armas
 
@@ -554,6 +557,21 @@ class Vampire_Cinvivals:
                 enemies.append(ZombieTwo(spawn_x, spawn_y))
                 enemies.append(ZombieOne(spawn_x, spawn_y))
 
+               # Verifica se o boss já está em campo ou morrendo
+                boss_exists = any(isinstance(e, ZombieBoss) and not e.is_dying for e in enemies)
+
+                # Condições para spawn do boss
+                can_spawn_boss = False
+
+                if not boss_exists:
+                    if self.last_boss_death_time is None and elapsed_time >= self.boss_spawn_time:
+                        can_spawn_boss = True  # Primeiro spawn
+                    elif self.last_boss_death_time is not None and elapsed_time - self.last_boss_death_time >= self.boss_respawn_delay:
+                        can_spawn_boss = True  # Respawn após morte
+
+                if can_spawn_boss:
+                    enemies.append(ZombieBoss(spawn_x, spawn_y))
+
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
 
                 cracha_radius = self.active_weapons['Cracha'].radius
@@ -609,7 +627,8 @@ class Vampire_Cinvivals:
                 enemy_one.is_dying = True
                 enemy_one.death_frame_timer = 0
             elif enemy_one.marked_for_removal:
-
+                if isinstance(enemy_one, ZombieBoss):
+                    self.last_boss_death_time = elapsed_time  # Registra o tempo da morte do boss
                 enemies.remove(enemy_one)
 
                 player.xp += 1

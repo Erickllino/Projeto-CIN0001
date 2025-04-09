@@ -3,7 +3,7 @@ import math
 import random
 
 class Enemy:
-    def __init__(self, x, y, sprite_path, frame_counts, scale, life=10, speed=1.0, damage=1):
+    def __init__(self, x, y, sprite_path, frame_counts, scale, life=10, speed=1.0, damage=1, death_frame_speed=0.1):
         self.x = random.randint(0, x)
         self.y = random.randint(0, y)
         self.life = life
@@ -26,7 +26,7 @@ class Enemy:
         self.is_dying = False
         self.death_frame_index = 0
         self.death_frame_timer = 0
-        self.death_frame_speed = 0.1
+        self.death_frame_speed = death_frame_speed  
         self.marked_for_removal = False 
 
         self.atack = False
@@ -143,3 +143,79 @@ class ZombieTwo(Enemy):
             speed=2,
             damage=4
         )
+
+class ZombieBoss(Enemy):
+    def __init__(self, x, y):
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombieboss",
+            frame_counts={"andando": 193, "morrendo": 183, "atacando": 92},
+            scale=(130, 130),  
+            life=100,        
+            speed=0.8,        
+            damage=20,        
+            death_frame_speed=0.2  
+        )
+        self.radius = 50  
+        self.frame_speed = 0.1
+        self.atack_frame_speed = 0.3
+        self.radius = 60
+        self.attack_cooldown = 1.3 
+
+    def move(self, player, mask):
+        if self.is_dying or self.atack:
+            return
+
+        dx = player.x - self.x
+        dy = player.y - self.y
+        distance = math.hypot(dx, dy)
+        self.moving_left = dx < 0
+
+        if distance < 75:
+            self.atack = True
+            return
+
+        if distance > 0:
+            dx /= distance
+            dy /= distance
+
+        # Movimento base
+        new_x = self.x + dx * self.speed
+        new_y = self.y + dy * self.speed
+
+        frame_width = self.frames[0].get_width()
+        frame_height = self.frames[0].get_height()
+        offset_x = frame_width // 2
+        offset_y = frame_height // 2
+
+        future_pos_x = (int(new_x) - offset_x, int(self.y) - offset_y)
+        future_pos_y = (int(self.x) - offset_x, int(new_y) - offset_y)
+
+        moved_x = False
+        moved_y = False
+
+        if mask.overlap(self.mask, future_pos_x) is None:
+            self.x = new_x
+            moved_x = True
+
+        if mask.overlap(self.mask, future_pos_y) is None:
+            self.y = new_y
+            moved_y = True
+
+        # caso fique preso, tenta ajustar com ângulo aleatório
+        if not moved_x and not moved_y:
+            angle_offset = random.uniform(-math.pi / 4, math.pi / 4)  
+            angle = math.atan2(dy, dx) + angle_offset
+            dodge_dx = math.cos(angle)
+            dodge_dy = math.sin(angle)
+
+            alt_x = self.x + dodge_dx * self.speed
+            alt_y = self.y + dodge_dy * self.speed
+
+            future_alt_x = (int(alt_x) - offset_x, int(self.y) - offset_y)
+            future_alt_y = (int(self.x) - offset_x, int(alt_y) - offset_y)
+
+            if mask.overlap(self.mask, future_alt_x) is None:
+                self.x = alt_x
+            if mask.overlap(self.mask, future_alt_y) is None:
+                self.y = alt_y
