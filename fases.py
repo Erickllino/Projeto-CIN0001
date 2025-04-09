@@ -104,7 +104,7 @@ class Fase:
     def desenhar(self, tela, offset_x, offset_y):
 
         fonte = pygame.font.Font(None, 36)
-        texto = fonte.render(self.instrucoes, True, (255, 255, 0))  # Cinza
+        texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
         tela.blit(texto, (20, 60))
 
         # Timer na tela
@@ -115,7 +115,7 @@ class Fase:
 
         elif (self.numero == 3 or self.numero == 4)and not self.esta_concluida:
             objetos_restantes =  self.objetivos - self.contador
-            timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}", True, (255, 255, 200))
+            timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}", True, (255, 255, 0))
             tela.blit(timer_texto, (20, 100))
 
         for circulo in self.circulos:

@@ -58,8 +58,6 @@ class Vampire_Cinvivals:
         # Inicializa o som de level up
         self.level_up_sound = pygame.mixer.Sound("sprites/sons_effects/level_up.mp3")
 
-
-
         # Inicializa o som de morte
         self.game_over_sound = pygame.mixer.Sound("sprites/sons_effects/game_over.mp3")
 
@@ -266,18 +264,14 @@ class Vampire_Cinvivals:
 
 
 
-
-
-
-
             # Configura a fonte do Texto do upgrade
 
             font = pygame.font.SysFont('Arial', 30)
             Level_up_font = pygame.font.SysFont('Arial', 50)
             max_text_width = up_size - 10  # margem
             
-            tittle = font.render('Level UP!', True, (255,255,0))
-            self.display.blit(tittle, ((self.w - up_size) // 2 - tittle.get_width()//2, self.h//2 - tittle.get_height()//2 - up_size))
+            tittle = Level_up_font.render('Level UP!', True, (255,255,0), (200,200,200))
+            self.display.blit(tittle, ((self.w) // 2 - tittle.get_width()//2, (self.h  - up_size)//2 - tittle.get_height()-30))
 
             lines1 = wrap_text(selected_upgrades[selected_keys[0]][0], font, max_text_width)
 
@@ -317,15 +311,15 @@ class Vampire_Cinvivals:
 
 
 
-            upgrade1 = my_font.render("Aperte 1", True, (0, 0, 0))
+            upgrade1 = my_font.render("Aperte 1", True, (0, 0, 0), (255, 255, 255))
 
             self.display.blit(upgrade1, ((self.w-up_size)//4-up_size//2, (self.h-up_size)//2-30))
 
-            upgrade2 = my_font.render("Aperte 2", True, (0, 0, 0))
+            upgrade2 = my_font.render("Aperte 2", True, (0, 0, 0), (255, 255, 255))
 
             self.display.blit(upgrade2, ((self.w-up_size)//2, (self.h-up_size)//2-30))
 
-            upgrade3 = my_font.render("Aperte 3", True, (0, 0, 0))
+            upgrade3 = my_font.render("Aperte 3", True, (0, 0, 0), (255, 255, 255))
 
             self.display.blit(upgrade3, ((3*self.w-up_size)//4, (self.h-up_size)//2-30))
 
