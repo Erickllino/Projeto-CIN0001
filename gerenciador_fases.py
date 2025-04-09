@@ -21,6 +21,6 @@ class GerenciadorFases:
         if self.fase_atual and not self.fase_atual.esta_concluida:
             self.fase_atual.atualizar(posicao_jogador, delta_tempo)
     
-    def desenhar(self, tela):
+    def desenhar(self, tela, offset_x, offset_y):
         if self.fase_atual:
-            self.fase_atual.desenhar(tela)
+            self.fase_atual.desenhar(tela, offset_x, offset_y)

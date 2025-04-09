@@ -425,7 +425,7 @@ class Vampire_Cinvivals:
 
 
         # Renderizar elementos das fases
-        self.gerenciador_fases.desenhar(self.display)
+        self.gerenciador_fases.desenhar(self.display, offset_x, offset_y)
 
         player.draw(self.display, (window_size[0] // 2, window_size[1] // 2), map_size, window_size, offset_x, offset_y)
 

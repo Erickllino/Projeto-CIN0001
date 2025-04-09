@@ -79,7 +79,7 @@ class Fase:
 
             print(tempo_atual, self.tempo_inicial, self.contador)
 
-    def desenhar(self, tela):
+    def desenhar(self, tela, offset_x, offset_y):
 
         fonte = pygame.font.Font(None, 36)
         texto = fonte.render(self.instrucoes, True, (200, 200, 200))  # Cinza
@@ -96,13 +96,9 @@ class Fase:
             timer_texto = fonte.render(f"Objetivos não coletados: {objetos_restantes}s", True, (200, 200, 200))
             tela.blit(timer_texto, (20, 60))
 
-        # Desenhar círculos com offset correto 
-        from main import Vampire_Cinvivals  # Importe a classe do jogo para acessar o offset
-        jogo = Vampire_Cinvivals._instancia
-
         for circulo in self.circulos:
-            x = circulo["posicao"][0] - jogo.offset_x
-            y = circulo["posicao"][1] - jogo.offset_y
+            x = circulo["posicao"][0] - offset_x
+            y = circulo["posicao"][1] - offset_y
 
             surface = pygame.Surface((circulo["raio"] * 2, circulo["raio"] * 2), pygame.SRCALPHA)
             pygame.draw.circle(surface, (255, 0, 0, 150), (circulo["raio"], circulo["raio"]), circulo["raio"])
