@@ -146,6 +146,42 @@ class ZombieTwo(Enemy):
             damage=4
         )
 
+class ZombieThree(Enemy):
+    def __init__(self, x, y):
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombie3",
+            frame_counts={"andando": 7, "morrendo": 8, "atacando": 5},
+            scale=(48, 48),
+            life=25,
+            speed=2,
+            damage=10
+        )
+
+class ZombieFour(Enemy):
+    def __init__(self, x, y):
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombie4",
+            frame_counts={"andando": 7, "morrendo": 7, "atacando": 6},
+            scale=(48, 48),
+            life=30,
+            speed=1.0,
+            damage=6
+        )
+
+class ZombieFive(Enemy):
+    def __init__(self, x, y):
+        super().__init__(
+            x, y,
+            sprite_path="sprites/zombie/zombie5",
+            frame_counts={"andando": 7, "morrendo": 8, "atacando": 5},
+            scale=(48, 48),
+            life=27,
+            speed=1.5,
+            damage=8
+        )
+
 class ZombieBoss(Enemy):
     def __init__(self, x, y):
         super().__init__(

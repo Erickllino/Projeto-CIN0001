@@ -4,7 +4,7 @@ import math
 import time
 from weapons import Basic_attack, Bottle
 
-from Enemies import ZombieOne, ZombieTwo, ZombieBoss
+from Enemies import ZombieOne, ZombieTwo, ZombieThree, ZombieFour, ZombieFive, ZombieBoss
 
 from PlayerCharacter import Player
 
@@ -597,7 +597,7 @@ class Vampire_Cinvivals:
         # Spawn Enemies
         
         if len(enemies) <= 500:
-            spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
+            spawn_rate = int(0.318519 * (elapsed_time ** 0.6231684))  # metade da fórmula original
         elif len(enemies) > 500:
             spawn_rate = 0
             for enemy in enemies:
@@ -636,6 +636,9 @@ class Vampire_Cinvivals:
         
                 enemies.append(ZombieTwo(spawn_x, spawn_y))
                 enemies.append(ZombieOne(spawn_x, spawn_y))
+                enemies.append(ZombieThree(spawn_x, spawn_y))
+                enemies.append(ZombieFour(spawn_x, spawn_y))
+                enemies.append(ZombieFive(spawn_x, spawn_y))
 
                # Verifica se o boss já está em campo ou morrendo
                 boss_exists = any(isinstance(e, ZombieBoss) and not e.is_dying for e in enemies)
