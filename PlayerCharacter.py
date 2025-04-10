@@ -32,7 +32,7 @@ class Player:
         self.upgrades = {'Health':['Aumenta a vida do jogador em 10%', 'player.max_health *= 1.1 ; player.health *= 1.1'],
                          'Restore Health':['Restaura a vida do jogador', 'player.health = player.max_health'], 
                          'Speed':['Aumenta a velocidade em 10%', 'player.speed *= 1.1'],
-                         'Life Steal':[self.get_life_steal_description(), 'player.life_steal += 0.1'],
+                         'Life Steal':[self.get_life_steal_description(), 'player.life_steal += 0.05'],
                          'Cracha radius':['Aumenta o raio do ataque básico em 10%', 'self.active_weapons[\'Cracha\'].radius *= 1.1'],
                          'Cracha damage':['Aumenta o dano do ataque básico em 10', 'self.active_weapons[\'Cracha\'].damage += 10'],
                          'Cracha cooldown':['Diminui o cooldown do ataque básico', 'self.active_weapons[\'Cracha\'].cooldown *= 0.9']}

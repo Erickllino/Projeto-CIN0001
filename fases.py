@@ -109,18 +109,28 @@ class Fase:
 
         # Timer na tela
         if (self.numero == 1 or self.numero == 2) and not self.esta_concluida:
+            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
+            tela.blit(texto, (20, 60))
             tempo_restante = max(0, self.objetivos - self.contador)
             timer_texto = fonte.render(f"Tempo necessário restante: {tempo_restante}s", True, (255, 255, 0))
             tela.blit(timer_texto, (20, 100))
 
         elif (self.numero == 3) and not self.esta_concluida:
+            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
+            tela.blit(texto, (20, 60))
             objetos_restantes =  self.objetivos - self.contador
             timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}/3", True, (255, 255, 0))
             tela.blit(timer_texto, (20, 100))
 
         elif (self.numero == 4) and not self.esta_concluida:
+            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
+            tela.blit(texto, (20, 60))
             timer_texto = fonte.render(f"Monitor coletados: {1}/1", True, (255, 200, 12))
             tela.blit(timer_texto, (20, 100))
+
+        else:
+            texto = fonte.render("Mate o zumbi gigante e corra para Casa!", True, (0, 255, 0))
+            tela.blit(texto, (20, 60))
 
         for circulo in self.circulos:
             x = circulo["posicao"][0] - offset_x

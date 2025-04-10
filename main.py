@@ -61,10 +61,14 @@ class Vampire_Cinvivals:
         # Inicializa o som de morte
         self.game_over_sound = pygame.mixer.Sound("sprites/sons_effects/game_over.mp3")
         
+        # Inicializa o som de vitória
+        self.victory_sound = pygame.mixer.Sound("sprites/sons_effects/victory.mp3")
+
         self.menu_music = pygame.mixer.Sound("sprites/sons_effects/menu_music.mp3")
         # Inicializa o spawn de inimigos
         self.last_spawn = 0
 
+        self.boss = None
         self.boss_can_spawn = False  # Controle para o spawn do boss
         self.boss_spawn_time = None  # 1 minutos para o primeiro spawn
         self.boss_respawn_delay = 120   # 2 minutos para reaparecer após a morte
@@ -379,7 +383,51 @@ class Vampire_Cinvivals:
 
                         leveling_up = False        
 
-    
+    def victory_screen(self, game):
+        won = True
+        pygame.mixer.stop()
+
+        self.victory_sound.play()
+        self.victory_sound.set_volume(1)
+        
+        while won:
+
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+                # Quando o jogador pressionar qualquer tecla
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    return
+                        
+
+
+            # Preenche a tela com uma cor de fundo
+
+            # da pra colocar um imagem aqui
+            game.display.fill((0, 0, 0))
+            final_font = pygame.font.Font('font/Mantinia Regular/Mantinia Regular.otf', 100)
+            title_text = final_font.render("Você Venceu!", False, (255, 255, 255))
+
+            prompt_text = my_font.render("Aperte Enter", True, (255, 255, 255))
+
+            # Centraliza os textos na tela
+
+            title_pos = (self.w // 2 - title_text.get_width() // 2, self.h // 2 - 100)
+
+            prompt_pos = (self.w // 2 - prompt_text.get_width() // 2, self.h // 2 + 100)
+
+            game.display.blit(title_text, title_pos)
+
+            game.display.blit(prompt_text, prompt_pos)
+
+            pygame.display.flip()
+
+            clock.tick(60)
+
+
     def play_step(self, player, enemies, elapsed_time):
 
         # Eventos do jogo
@@ -401,6 +449,7 @@ class Vampire_Cinvivals:
                 
                 del enemies[:]
 
+
                 
 
         keys = pygame.key.get_pressed()
@@ -417,11 +466,12 @@ class Vampire_Cinvivals:
                 
                 self.boss_can_spawn = True  # Permite o spawn do boss após todas as fases serem concluídas
                 self.boss_spawn_time = elapsed_time  # Registra o tempo do primeiro spawn do boss
-            elif self.last_boss_death_time is not None:
-                
-                
-                self.victory = True # Retorna True para indicar que o jogo deve terminar após a morte do boss
+                print("Boss Spawned at:", self.boss_spawn_time)
 
+            elif self.last_boss_death_time is not None:
+                self.victory = True # Retorna True para indicar que o jogo deve terminar após a morte do boss
+            
+            
         self.display.fill((0, 0, 0))
 
         map_size = self.Map.get_size()
@@ -545,9 +595,16 @@ class Vampire_Cinvivals:
            player.level += 1
 
         # Spawn Enemies
+        
         if len(enemies) <= 500:
             spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
-
+        elif len(enemies) > 500:
+            spawn_rate = 0
+            for enemy in enemies:
+                distance = math.hypot(player.x - enemy.x, player.y - enemy.y)
+                if distance > 1000:
+                    if enemy != self.boss:
+                        enemies.remove(enemy)       
         else:
             spawn_rate = 5
 
@@ -590,10 +647,12 @@ class Vampire_Cinvivals:
                     return True  # Respawn após morte"""
 
                 if can_spawn_boss:
-                    enemies.append(ZombieBoss(1600, 3700))
+                    self.boss = ZombieBoss(2000, 3700)  # Posição inicial do boss
+                    enemies.append(self.boss)
                     self.boss_can_spawn = False  # Desabilita o spawn do boss após o primeiro spawn
                 
-
+                if self.boss is not None:
+                    print("Boss Spawned at:", self.boss.x, self.boss.y)
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
 
                 cracha_radius = self.active_weapons['Cracha'].radius
@@ -626,7 +685,7 @@ class Vampire_Cinvivals:
             distance = math.hypot(player.x - enemy.x, player.y - enemy.y)
 
             # Início do ataque (só acontece uma vez)
-            if distance < 20 and not player.invulnerable and not enemy.is_dying and not enemy.atack:
+            if distance < 35 and not player.invulnerable and not enemy.is_dying and not enemy.atack:
                 enemy.atack = True
                 enemy.atack_frame_timer = 0
                 enemy.atack_frame_index = 0
@@ -710,6 +769,7 @@ start_time = pygame.time.get_ticks()  # Tempo inicial do jogo
 
 
 game.main_menu(game)
+
 while try_again:
     
     while not game_over:
@@ -730,9 +790,8 @@ while try_again:
     else:
         try_again, game_over = game.game_over()
 
-pygame.mixer.stop()
-victory = pygame.mixer.Sound("sprites/sons_effects/victory.mp3")
-victory.play()
-victory.set_volume(1)  # Ajusta o volume do som de vitória
-time.sleep(3)
+  # Ajusta o volume do som de vitóriap
+
+game.victory_screen(game)
+
 pygame.quit()

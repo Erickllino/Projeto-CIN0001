@@ -116,7 +116,7 @@ class Enemy:
                     self.atack_frame_index = 0
                     self.atack_sound.play()
                     distance = math.hypot(player.x - self.x, player.y - self.y)
-                    if distance < 20 and not player.invulnerable:
+                    if distance < 30 and not player.invulnerable:
                         player.health -= self.damage
                         player.player_gets_damaged_sound.play()
                         player.player_gets_damaged_sound.set_volume(0.5)  # Reduz o som
@@ -152,7 +152,7 @@ class ZombieBoss(Enemy):
             x, y,
             sprite_path="sprites/zombie/zombieboss",
             frame_counts={"andando": 10, "morrendo": 6, "atacando": 5},
-            scale=(130, 130),  
+            scale=(254, 254),  
             life=100,        
             speed=0.8,        
             damage=20,        
@@ -161,9 +161,8 @@ class ZombieBoss(Enemy):
         self.radius = 50  
         self.frame_speed = 0.1
         self.atack_frame_speed = 0.3
-        self.radius = 60
         self.attack_cooldown = 1.3 
-
+"""
     def move(self, player, mask):
         if self.is_dying or self.atack:
             return
@@ -221,3 +220,4 @@ class ZombieBoss(Enemy):
                 self.x = alt_x
             if mask.overlap(self.mask, future_alt_y) is None:
                 self.y = alt_y
+"""
