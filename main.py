@@ -14,7 +14,7 @@ from fases import Fase, dados_fase1, dados_fase2, dados_fase3, dados_fase4
 pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
-my_font = pygame.font.SysFont('Comic Sans MS', 20)
+my_font = pygame.font.Font('font\Mantinia Regular\Mantinia Regular.otf', 20)
 
 
 class Vampire_Cinvivals:
@@ -60,7 +60,8 @@ class Vampire_Cinvivals:
 
         # Inicializa o som de morte
         self.game_over_sound = pygame.mixer.Sound("sprites/sons_effects/game_over.mp3")
-
+        
+        self.menu_music = pygame.mixer.Sound("sprites/sons_effects/menu_music.mp3")
         # Inicializa o spawn de inimigos
         self.last_spawn = 0
 
@@ -94,7 +95,8 @@ class Vampire_Cinvivals:
     def main_menu(self,game):
 
         menu_ativo = True
-
+        self.menu_music.play(-1)  # Toca a música em loop
+        self.menu_music.set_volume(10000)  # Ajusta o volume da música do menu
         while menu_ativo:
 
             for event in pygame.event.get():
@@ -109,26 +111,27 @@ class Vampire_Cinvivals:
 
                 if event.type == pygame.KEYDOWN:
 
-                    if event.key == pygame.K_RETURN:
+                    if event.key:
 
                         menu_ativo = False
+                        self.menu_music.stop()  # Para a música do menu quando o jogo começa
                         
 
             # Preenche a tela com uma cor de fundo
             # da pra colocar um imagem aqui
             game.display.fill((0, 0, 0))
 
-            menu_font = pygame.font.SysFont('Comic Sans MS', 50)
+            menu_font = pygame.font.Font('font\Mantinia Regular\Mantinia Regular.otf', 100)
 
             # Renderiza o título e a mensagem de iniciar
             title_text = menu_font.render("Vampire Cinvivals", True, (255, 255, 255))
 
-            prompt_text = my_font.render("Pressione Enter para iniciar", True, (255, 255, 255))
+            prompt_text = my_font.render("Pressione Qualquer Tecla", True, (255, 255, 255))
 
             # Centraliza os textos na tela
             title_pos = (game.w // 2 - title_text.get_width() // 2, game.h // 2 - 100)
 
-            prompt_pos = (game.w // 2 - prompt_text.get_width() // 2, game.h // 2)
+            prompt_pos = (game.w // 2 - prompt_text.get_width() // 2, game.h // 2 + 100)
 
             game.display.blit(title_text, title_pos)
             game.display.blit(prompt_text, prompt_pos)
@@ -205,7 +208,8 @@ class Vampire_Cinvivals:
 
     def level_up(self, player):
 
- 
+        pygame.mixer.stop()
+
         # Seleciona 3 upgrades aleatórios
         selected_keys = random.sample(list(player.upgrades.keys()), 3)
 
@@ -213,8 +217,9 @@ class Vampire_Cinvivals:
         selected_upgrades = { key: player.upgrades[key] for key in selected_keys }
 
         # Inicializa o som de level up
-        leveling_up = True
         self.level_up_sound.play()
+        self.level_up_sound.set_volume(1)  # Ajusta o volume do som de level up
+        leveling_up = True
 
         while leveling_up:
             
@@ -669,7 +674,7 @@ class Vampire_Cinvivals:
         # Mostrar a vida do jogador
 
 
-        health_text = my_font.render(f'Health: {player.health}', True, (255, 0, 0))
+        health_text = my_font.render(f'Vida: {player.health}/{player.max_health}', True, (255, 0, 0), (200,200,200))
 
         self.display.blit(health_text, (10, self.h - 30))
 

@@ -38,6 +38,8 @@ class Basic_attack:
             self.weapon_sound.play()
             self.weapon_sound.set_volume(0.2)
             pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
+        else:
+            self.weapon_sound.stop()
 
     def can_activate(self, elapsed_time):
         return elapsed_time - self.activation_time >= self.cooldown
