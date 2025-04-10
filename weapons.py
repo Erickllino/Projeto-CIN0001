@@ -16,6 +16,8 @@ class Basic_attack:
         
         self.activation_time = -self.cooldown  # Inicializa com um valor que não bloqueie logo no começo
         
+        self.weapon_sound = pygame.mixer.Sound("sprites/sons_effects/som_armas/som_cracha.mp3")
+
         self.color = (0, 0, 100)
         self.radius = 60
 
@@ -33,6 +35,8 @@ class Basic_attack:
         #self.draw_duration = self.cooldown/2
         
         if elapsed_time - self.activation_time < self.draw_duration:
+            self.weapon_sound.play()
+            self.weapon_sound.set_volume(0.2)
             pygame.draw.circle(game_window, self.color, (self.x, self.y), self.radius, width=5)
 
     def can_activate(self, elapsed_time):

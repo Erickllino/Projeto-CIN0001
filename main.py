@@ -63,9 +63,13 @@ class Vampire_Cinvivals:
 
         # Inicializa o spawn de inimigos
         self.last_spawn = 0
-        self.boss_spawn_time = 1  # 1 minutos para o primeiro spawn
+
+        self.boss_can_spawn = False  # Controle para o spawn do boss
+        self.boss_spawn_time = None  # 1 minutos para o primeiro spawn
         self.boss_respawn_delay = 120   # 2 minutos para reaparecer após a morte
         self.last_boss_death_time = None
+
+        self.victory = False  # Controle para a vitória do jogador
 
         # Inicializa as armas, pode ser adicionado mais armas
 
@@ -370,6 +374,7 @@ class Vampire_Cinvivals:
 
                         leveling_up = False        
 
+    
     def play_step(self, player, enemies, elapsed_time):
 
         # Eventos do jogo
@@ -402,8 +407,15 @@ class Vampire_Cinvivals:
 
         # Verificar transição de fases
         if self.gerenciador_fases.fase_atual.esta_concluida:
-            if not self.gerenciador_fases.iniciar_proxima_fase():
-                print("Todas as fases concluídas!")
+            
+            if not self.gerenciador_fases.iniciar_proxima_fase() and self.boss_spawn_time == None:
+                
+                self.boss_can_spawn = True  # Permite o spawn do boss após todas as fases serem concluídas
+                self.boss_spawn_time = elapsed_time  # Registra o tempo do primeiro spawn do boss
+            elif self.last_boss_death_time is not None:
+                
+                
+                self.victory = True # Retorna True para indicar que o jogo deve terminar após a morte do boss
 
         self.display.fill((0, 0, 0))
 
@@ -453,13 +465,13 @@ class Vampire_Cinvivals:
                         self.active_weapons['Garrafa'] = ""
  
             if weapon_instance == 'Garrafa_dourada' and time.time() - self.temp_gold >= 20:
-                screen_x = 1820 - offset_x
-                screen_y = 3350 - offset_y
+                screen_x = 2100 - offset_x
+                screen_y = 4000 - offset_y
                 imagem = pygame.image.load("./sprites/garrafa/garrafa_dourada.png")
                 imagem = pygame.transform.scale(imagem, (50, 60))
                 self.display.blit(imagem, (int(screen_x), int(screen_y)))
                     
-                if player.hitbox().colliderect(pygame.Rect(1800 - 10, 3330 - 10, 20, 20)):
+                if player.hitbox().colliderect(pygame.Rect(2100 - 10, 4000 - 10, 20, 20)):
                     self.active_weapons['Garrafa_dourada'] = True
                     self.temp_gold = time.time()
                     time.sleep(1)
@@ -528,11 +540,11 @@ class Vampire_Cinvivals:
            player.level += 1
 
         # Spawn Enemies
-        if len(enemies) <= 1000:
+        if len(enemies) <= 500:
             spawn_rate = int(0.530865 * (elapsed_time ** 0.6231684))  # metade da fórmula original
 
         else:
-            spawn_rate = 30
+            spawn_rate = 5
 
         if elapsed_time != self.last_spawn:
 
@@ -540,34 +552,26 @@ class Vampire_Cinvivals:
 
                 bool_spawn = True
 
-                while bool_spawn:
+                
 
 
 
-                    spawn_x = random.randint(0, self.Map.get_width())
+                distancia_minima = math.sqrt(self.display.get_width()**2 + self.display.get_height()**2) / 2 - 100
 
-                    spawn_y = random.randint(0, self.Map.get_height())
+                # Escolhe um ângulo aleatório (em radianos)
+                angulo = random.uniform(0, 2 * math.pi)
 
-                    # Calcular a área visível da tela
+                # Calcula a posição de spawn fora do campo de visão
+                spawn_x = player.x + math.cos(angulo) * distancia_minima
+                spawn_y = player.y + math.sin(angulo) * distancia_minima
+                # Verificar se a posição de spawn está fora da área visível
 
-                    visible_x_min = player.draw_x - self.display.get_width() // 2
+                spawn_x = int(max(0, min(spawn_x, self.walls.get_width() - 1)))
+                spawn_y = int(max(0, min(spawn_y, self.walls.get_height() - 1)))
 
-                    visible_x_max = player.draw_x + self.display.get_width() // 2
+                
 
-                    visible_y_min = player.draw_y - self.display.get_height() // 2
-
-                    visible_y_max = player.draw_y + self.display.get_height() // 2
-
-                    # Verificar se a posição de spawn está fora da área visível
-
-                    if not (visible_x_min <= spawn_x <= visible_x_max and visible_y_min <= spawn_y <= visible_y_max):
-
-                        
-
-                        bool_spawn = False
-
-            
-
+        
                 enemies.append(ZombieTwo(spawn_x, spawn_y))
                 enemies.append(ZombieOne(spawn_x, spawn_y))
 
@@ -575,16 +579,15 @@ class Vampire_Cinvivals:
                 boss_exists = any(isinstance(e, ZombieBoss) and not e.is_dying for e in enemies)
 
                 # Condições para spawn do boss
-                can_spawn_boss = False
+                can_spawn_boss = self.boss_can_spawn
 
-                if not boss_exists:
-                    if self.last_boss_death_time is None and elapsed_time >= self.boss_spawn_time:
-                        can_spawn_boss = True  # Primeiro spawn
-                    elif self.last_boss_death_time is not None and elapsed_time - self.last_boss_death_time >= self.boss_respawn_delay:
-                        can_spawn_boss = True  # Respawn após morte
+                if  self.last_boss_death_time is not None and elapsed_time - self.last_boss_death_time >= self.boss_respawn_delay:
+                    return True  # Respawn após morte"""
 
                 if can_spawn_boss:
-                    enemies.append(ZombieBoss(spawn_x, spawn_y))
+                    enemies.append(ZombieBoss(1600, 3700))
+                    self.boss_can_spawn = False  # Desabilita o spawn do boss após o primeiro spawn
+                
 
                 #enemies.append(Enemy_one(random.randint(1000, 2550), random.randint(1500, 3300)))
 
@@ -644,7 +647,6 @@ class Vampire_Cinvivals:
                 if isinstance(enemy_one, ZombieBoss):
                     self.last_boss_death_time = elapsed_time  # Registra o tempo da morte do boss
                 enemies.remove(enemy_one)
-
                 player.xp += 1
 
         # Mostrar FPS, tempo, vida e XP
@@ -711,11 +713,15 @@ while try_again:
 
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
 
-
         game_over = game.play_step(player, enemies, elapsed_time)
 
-
-
-    try_again, game_over = game.game_over()
+        won = game.victory
+        if won:
+            break
+    if won:
+        print("Você venceu!")
+        game_over = False
+    else:
+        try_again, game_over = game.game_over()
 
 pygame.quit()

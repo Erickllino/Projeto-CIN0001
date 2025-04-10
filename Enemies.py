@@ -119,7 +119,7 @@ class Enemy:
                     if distance < 20 and not player.invulnerable:
                         player.health -= self.damage
                         player.player_gets_damaged_sound.play()
-                        player.player_gets_damaged_sound.set_volume(0.1)  # Reduz o som
+                        player.player_gets_damaged_sound.set_volume(0.5)  # Reduz o som
                         player.make_invulnerable(current_time)
                         
 class ZombieOne(Enemy):
@@ -151,7 +151,7 @@ class ZombieBoss(Enemy):
         super().__init__(
             x, y,
             sprite_path="sprites/zombie/zombieboss",
-            frame_counts={"andando": 193, "morrendo": 183, "atacando": 92},
+            frame_counts={"andando": 10, "morrendo": 6, "atacando": 5},
             scale=(130, 130),  
             life=100,        
             speed=0.8,        

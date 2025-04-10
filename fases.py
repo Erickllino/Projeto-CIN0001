@@ -113,9 +113,13 @@ class Fase:
             timer_texto = fonte.render(f"Tempo necessário restante: {tempo_restante}s", True, (255, 255, 0))
             tela.blit(timer_texto, (20, 100))
 
-        elif (self.numero == 3 or self.numero == 4)and not self.esta_concluida:
+        elif (self.numero == 3) and not self.esta_concluida:
             objetos_restantes =  self.objetivos - self.contador
-            timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}", True, (255, 255, 0))
+            timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}/3", True, (255, 255, 0))
+            tela.blit(timer_texto, (20, 100))
+
+        elif (self.numero == 4) and not self.esta_concluida:
+            timer_texto = fonte.render(f"Monitor coletados: {1}/1", True, (255, 200, 12))
             tela.blit(timer_texto, (20, 100))
 
         for circulo in self.circulos:
