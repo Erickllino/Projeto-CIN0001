@@ -14,7 +14,7 @@ from fases import Fase, dados_fase1, dados_fase2, dados_fase3, dados_fase4
 pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
-my_font = pygame.font.Font('font\Mantinia Regular\Mantinia Regular.otf', 20)
+my_font = pygame.font.Font('font/Mantinia Regular/Mantinia Regular.otf', 20)
 
 
 class Vampire_Cinvivals:
@@ -121,7 +121,7 @@ class Vampire_Cinvivals:
             # da pra colocar um imagem aqui
             game.display.fill((0, 0, 0))
 
-            menu_font = pygame.font.Font('font\Mantinia Regular\Mantinia Regular.otf', 100)
+            menu_font = pygame.font.Font('font/Mantinia Regular/Mantinia Regular.otf', 100)
 
             # Renderiza o título e a mensagem de iniciar
             title_text = menu_font.render("Vampire Cinvivals", True, (255, 255, 255))
@@ -470,13 +470,13 @@ class Vampire_Cinvivals:
                         self.active_weapons['Garrafa'] = ""
  
             if weapon_instance == 'Garrafa_dourada' and time.time() - self.temp_gold >= 20:
-                screen_x = 2100 - offset_x
-                screen_y = 4000 - offset_y
+                screen_x = 1925 - offset_x
+                screen_y = 4550 - offset_y
                 imagem = pygame.image.load("./sprites/garrafa/garrafa_dourada.png")
                 imagem = pygame.transform.scale(imagem, (50, 60))
                 self.display.blit(imagem, (int(screen_x), int(screen_y)))
                     
-                if player.hitbox().colliderect(pygame.Rect(2100 - 10, 4000 - 10, 20, 20)):
+                if player.hitbox().colliderect(pygame.Rect(1925 - 10, 4550 - 10, 20, 20)):
                     self.active_weapons['Garrafa_dourada'] = True
                     self.temp_gold = time.time()
                     time.sleep(1)
@@ -674,7 +674,7 @@ class Vampire_Cinvivals:
         # Mostrar a vida do jogador
 
 
-        health_text = my_font.render(f'Vida: {player.health}/{player.max_health}', True, (255, 0, 0), (200,200,200))
+        health_text = my_font.render(f'Vida: {player.health:.2f}/{player.max_health:.2f}', True, (255, 0, 0), (200,200,200))
 
         self.display.blit(health_text, (10, self.h - 30))
 
@@ -726,7 +726,13 @@ while try_again:
     if won:
         print("Você venceu!")
         game_over = False
+        try_again = False
     else:
         try_again, game_over = game.game_over()
 
+pygame.mixer.stop()
+victory = pygame.mixer.Sound("sprites/sons_effects/victory.mp3")
+victory.play()
+victory.set_volume(1)  # Ajusta o volume do som de vitória
+time.sleep(3)
 pygame.quit()

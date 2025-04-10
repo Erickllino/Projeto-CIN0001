@@ -190,8 +190,8 @@ class ZombieBoss(Enemy):
         offset_x = frame_width // 2
         offset_y = frame_height // 2
 
-        future_pos_x = (int(new_x) - offset_x, int(self.y) - offset_y)
-        future_pos_y = (int(self.x) - offset_x, int(new_y) - offset_y)
+        future_pos_x = (int(new_x) - 100, int(self.y) - 100)
+        future_pos_y = (int(self.x) - 100, int(new_y) - 100)
 
         moved_x = False
         moved_y = False
@@ -214,8 +214,8 @@ class ZombieBoss(Enemy):
             alt_x = self.x + dodge_dx * self.speed
             alt_y = self.y + dodge_dy * self.speed
 
-            future_alt_x = (int(alt_x) - offset_x, int(self.y) - offset_y)
-            future_alt_y = (int(self.x) - offset_x, int(alt_y) - offset_y)
+            future_alt_x = (int(alt_x) - 100, int(self.y) - 100)
+            future_alt_y = (int(self.x) - 100, int(alt_y) - 100)
 
             if mask.overlap(self.mask, future_alt_x) is None:
                 self.x = alt_x
