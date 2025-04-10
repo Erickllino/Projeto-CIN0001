@@ -104,29 +104,45 @@ class Fase:
     def desenhar(self, tela, offset_x, offset_y):
 
         fonte = pygame.font.Font(None, 36)
-        texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
-        tela.blit(texto, (20, 60))
+
+        j=0
+        for i in self.instrucoes:
+            texto = fonte.render(i, True, (255, 255, 0), (200,200,200))  # Cinza
+            tela.blit(texto, (20, 60+30*j))
+            j+=1
+
 
         # Timer na tela
         if (self.numero == 1 or self.numero == 2) and not self.esta_concluida:
-            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
-            tela.blit(texto, (20, 60))
+            
+            j=0
+            for i in self.instrucoes:
+                texto = fonte.render(i, True, (255, 255, 0), (200,200,200))  # Cinza
+                tela.blit(texto, (20, 60+30*j))
+                j+=1
             tempo_restante = max(0, self.objetivos - self.contador)
             timer_texto = fonte.render(f"Tempo necessário restante: {tempo_restante}s", True, (255, 255, 0))
-            tela.blit(timer_texto, (20, 100))
+            tela.blit(timer_texto, (20, 200))
 
         elif (self.numero == 3) and not self.esta_concluida:
-            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
-            tela.blit(texto, (20, 60))
+
+            j=0
+            for i in self.instrucoes:
+                texto = fonte.render(i, True, (255, 255, 0), (200,200,200))  # Cinza
+                tela.blit(texto, (20, 60+30*j))
+                j+=1
             objetos_restantes =  self.objetivos - self.contador
             timer_texto = fonte.render(f"Objetivos coletados: {3 - objetos_restantes}/3", True, (255, 255, 0))
-            tela.blit(timer_texto, (20, 100))
+            tela.blit(timer_texto, (20, 200))
 
         elif (self.numero == 4) and not self.esta_concluida:
-            texto = fonte.render(self.instrucoes, True, (255, 255, 0), (200,200,200))  # Cinza
-            tela.blit(texto, (20, 60))
+            j=0
+            for i in self.instrucoes:
+                texto = fonte.render(i, True, (255, 255, 0), (200,200,200))  # Cinza
+                tela.blit(texto, (20, 60+30*j))
+                j+=1
             timer_texto = fonte.render(f"Monitor coletados: {1}/1", True, (255, 200, 12))
-            tela.blit(timer_texto, (20, 100))
+            tela.blit(timer_texto, (20, 200))
 
         else:
             texto = fonte.render("Mate o zumbi gigante e corra para Casa!", True, (0, 255, 0))
@@ -144,24 +160,24 @@ class Fase:
 dados_fase1 = {
     "numero": 1,
     "objetivos": 10,  # 10 segundos dentro do círculo
-    "instrucoes": "Fique no círculo vermelho por 10 segundos!"
+    "instrucoes": ["Fique no círculo vermelho por 10 segundos!"]
 }
 
 dados_fase2 = {
     "numero": 2,
     "objetivos": 20,  # 20 segundos dentro do círculo
-    "instrucoes": "Um zumbi louco atacou a energia do grad em que você estava!\n vá para um novo grad e termine a segunda questão da lista!!"
+    "instrucoes": ["Um zumbi louco atacou a energia do grad em que você estava!", " vá para um novo grad e termine a segunda questão da lista!!"]
 }
 
 dados_fase3 = {
 
     "numero": 3,
     "objetivos": 3,  # 10 segundos dentro do círculo
-    "instrucoes": "você já tinha feito o código anteriormente,\n porém foi no papel a agora deve coletar os papéis rasgados pelo mapa para finalizar a questão 3!!!"
+    "instrucoes": ["você já tinha feito o código anteriormente, porém foi no papel","agora deve coletar os papéis rasgados pelo mapa para finalizar a questão 3!!!"]
 }
 
 dados_fase4 = {
     "numero": 4,
     "objetivos": 1,  # 10 segundos dentro do círculo
-    "instrucoes": "você achou a questão 4 muito difícil, procure um monitor que não tenha virado zumbi para lhe ajudar a finalizar a questão!!!"
+    "instrucoes": ["você achou a questão 4 muito difícil", "procure um monitor que não tenha virado zumbi para lhe ajudar a finalizar a questão!!!"]
 }
