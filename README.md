@@ -61,7 +61,7 @@ Além da programação orientada a objetos.
 - Funções: Resumidamente, todos os métodos das classes.
 
 ## Qual foi o maior erro cometido durante o projeto? Como vocês lidaram com ele?
-O nosso maior erro
+Tentar fazer o mais perfeito e completo possível, o que acabou acarretando em um pequeno atraso no avançar do desenvolvimento. Mas isso foi contornado com reuniões, uma troca de ideias constante entre a equipe e consenso de todas as partes.
 ## Qual foi o maior desafio enfrentado durante o projeto? Como vocês lidaram com ele?
 Implementar as ideias do planejamento inicial e adaptar-se às novas ideais que tiveram que ser alteradas ao longo do percurso foi crucial para avançar com o projeto. Inicialmente, a falta de um rumo claro prejudicou nosso progresso. Já que muitas das funcionalidades precisavam ser aprendidas em curto espaço de tempo, no caso o Pygame e POO. Para resolver isso, promovemos discussões frequentes entre a equipe para avaliar ideias viáveis e interessantes. Além disso, atribuímos responsabilidades com base nas habilidades individuais, um aspecto que não havia sido previamente discutido, e isso impulsionou significativamente o desenvolvimento de todas as aplicações. 
 ## Quais as lições aprendidas durante o projeto?
