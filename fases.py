@@ -160,7 +160,7 @@ class Fase:
 dados_fase1 = {
     "numero": 1,
     "objetivos": 10,  # 10 segundos dentro do círculo
-    "instrucoes": ["Fique no círculo vermelho por 10 segundos!"]
+    "instrucoes": ["vá para o grad 5 e fique próximo aos computadores para fazer a primeira questão!!","Fique no círculo vermelho por 10 segundos!"]
 }
 
 dados_fase2 = {
